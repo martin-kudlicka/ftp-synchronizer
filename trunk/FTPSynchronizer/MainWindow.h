@@ -6,6 +6,7 @@
 #include "Connections.h"
 #include <QHash>
 #include "ConnectionDialog.h"
+#include "FolderDialog.h"
 
 class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 {
@@ -20,8 +21,11 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 		QHash <QTreeWidgetItem *, QDomNode> qhTable;
 		QMenu *qmConnection;
 
-		void ConnectionDialogAccepted(const cConnectionDialog *ccdNewConnection, const eModify emModify);
+		void ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdNewConnection,
+														  const cFolderDialog *cfdNewFolder,
+														  const eModify emModify);
 		void ShowConnectionTree();
+		void ShowInfo(QTreeWidgetItem *qtwiSelected);
 
 	private slots:
 		void on_qaAddConnection_triggered();

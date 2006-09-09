@@ -16,6 +16,29 @@ const QString qsSYNCHRONIZATION = "Synchronization";
 const QString qsTYPE = "Type";
 const QString qsUSERNAME = "Username";
 
+// save changes into XML
+void cConnections::ApplyChanges(const eModify emModify, QDomNode qdnParent, const QDomNode qdnNewItem)
+{
+	if (emModify == Add) {
+		if (qdnParent.isNull()) {
+			qddXML.documentElement().appendChild(qdnNewItem);
+		} else {
+			if (GetProperty(qdnParent, Type) == qsFOLDER) {
+				qdnParent.appendChild(qdnNewItem);
+			} else {
+				QDomNode qdnRealParent;
+
+				qdnRealParent = qdnParent.parentNode();
+				qdnRealParent.insertAfter(qdnNewItem, qdnParent);
+			} // if else
+		} // if else
+	} else {
+		qdnParent.parentNode().replaceChild(qdnNewItem, qdnParent);
+	} // if else
+
+	Save();
+} // ApplyChanges
+
 // load XML file with connections
 cConnections::cConnections()
 {
@@ -61,28 +84,29 @@ QString cConnections::GetProperty(const QDomNode qdnConnection,
 	return qsResult;
 } // GetProperty
 
-// adds or edit connection in table
-QDomNode cConnections::ModifyConnection (const eModify emModify,
-													  QDomNode qdnParent,
-													  // Connection
-													  const QString qsName,
-													  const QString qsSource,
-													  const QString qsSourceUsername,
-													  const QString qsSourcePassword,
-													  const QString qsDestination,
-													  const QString qsDestinationUsername,
-													  const QString qsDestinationPassword,
-													  // Settings
-													  const bool bIncludeSubdirectories,
-													  // Synchronization
-													  const QString qsSynchronization,
-													  const bool bDeleteObsoleteFiles)
+// adds or edits connection
+QDomNode cConnections::ModifyConnection(const eModify emModify,
+													 QDomNode qdnParent,
+													 // Connection
+													 const QString qsName,
+													 const QString qsSource,
+													 const QString qsSourceUsername,
+													 const QString qsSourcePassword,
+													 const QString qsDestination,
+													 const QString qsDestinationUsername,
+													 const QString qsDestinationPassword,
+													 // Settings
+													 const bool bIncludeSubdirectories,
+													 // Synchronization
+													 const QString qsSynchronization,
+													 const bool bDeleteObsoleteFiles)
 {
 	QDomElement qdeProperty, qdeSubProperty;
 	QDomNode qdnNewConnection;
 
 	// create new connection with properties
 	qdnNewConnection = qddXML.createElement(qsCONNECTION);
+	qdnNewConnection.toElement().setAttribute(qsTYPE, qsCONNECTION);
 	// Connection
 	qdeProperty = qddXML.createElement(qsNAME);
 	qdnNewConnection.appendChild(qdeProperty);
@@ -125,29 +149,41 @@ QDomNode cConnections::ModifyConnection (const eModify emModify,
 	qdeSubProperty.appendChild(qdeProperty);
 	cXMLTools::SetText(qddXML, &qdeProperty, bDeleteObsoleteFiles ? qsTRUE : qsFALSE);
 
-	// connect or replace new connection
-	if (emModify == Add) {
-		if (qdnParent.isNull()) {
-			qddXML.documentElement().appendChild(qdnNewConnection);
-		} else {
-			if (GetProperty(qdnParent, Type) == qsFOLDER) {
-				qdnParent.appendChild(qdnNewConnection);
-			} else {
-				QDomNode qdnRealParent;
-
-				qdnRealParent = qdnParent.parentNode();
-				qdnRealParent.insertAfter(qdnNewConnection, qdnParent);
-			} // if else
-		} // if else
-	} else {
-		qdnParent.parentNode().replaceChild(qdnNewConnection, qdnParent);
-	} // if else
-
-	Save();
+	ApplyChanges(emModify, qdnParent, qdnNewConnection);
 
 	return qdnNewConnection;
 } // ModifyConnection
 
+// adds or edits folder
+QDomNode cConnections::ModifyFolder(const eModify emModify,
+												QDomNode qdnParent,
+												// properties
+												const QString qsName)
+{
+	QDomElement qdeProperty;
+	QDomNode qdnNewFolder;
+
+	// create new folder with properties
+	qdnNewFolder = qddXML.createElement(qsCONNECTION);
+	qdnNewFolder.toElement().setAttribute(qsTYPE, qsFOLDER);
+	// properties
+	qdeProperty = qddXML.createElement(qsNAME);
+	qdnNewFolder.appendChild(qdeProperty);
+	cXMLTools::SetText(qddXML, &qdeProperty, qsName);
+
+	ApplyChanges(emModify, qdnParent, qdnNewFolder);
+
+	return qdnNewFolder;
+} // ModifyFolder
+
+// removes connection or folder (with appended childrens)
+void cConnections::Remove(const QDomNode qdnConnection)
+{
+	qdnConnection.parentNode().removeChild(qdnConnection);
+	Save();
+} // Remove
+
+// saves changes into file
 void cConnections::Save()
 {
 	qfFile.resize(0);

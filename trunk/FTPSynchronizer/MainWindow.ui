@@ -45,8 +45,11 @@
       <property name="contextMenuPolicy" >
        <enum>Qt::CustomContextMenu</enum>
       </property>
+      <property name="selectionBehavior" >
+       <enum>QAbstractItemView::SelectItems</enum>
+      </property>
      </widget>
-     <widget class="QTextEdit" name="textEdit" >
+     <widget class="QTextEdit" name="qteConnectionInfo" >
       <property name="readOnly" >
        <bool>true</bool>
       </property>
@@ -90,11 +93,6 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile" >
-    <property name="title" >
-     <string>&amp;File</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuHelp" >
     <property name="title" >
      <string>&amp;Help</string>
@@ -115,6 +113,12 @@
     <addaction name="menuAdd" />
     <addaction name="qaEdit" />
     <addaction name="qaRemove" />
+   </widget>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="qaExit" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuEdit" />
@@ -178,8 +182,30 @@
     <string>&amp;Edit</string>
    </property>
   </action>
+  <action name="qaExit" >
+   <property name="text" >
+    <string>&amp;Exit</string>
+   </property>
+  </action>
  </widget>
  <pixmapfunction></pixmapfunction>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>qaExit</sender>
+   <signal>activated()</signal>
+   <receiver>qmwMainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>239</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

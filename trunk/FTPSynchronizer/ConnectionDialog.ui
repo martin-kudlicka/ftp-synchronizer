@@ -269,7 +269,7 @@
        <x>10</x>
        <y>10</y>
        <width>120</width>
-       <height>91</height>
+       <height>71</height>
       </rect>
      </property>
      <property name="title" >
@@ -304,25 +304,12 @@
        <string>Download</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="rbBothWays" >
-      <property name="geometry" >
-       <rect>
-        <x>10</x>
-        <y>60</y>
-        <width>83</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="text" >
-       <string>Both ways</string>
-      </property>
-     </widget>
     </widget>
     <widget class="QCheckBox" name="cbDeleteObsoleteFiles" >
      <property name="geometry" >
       <rect>
        <x>10</x>
-       <y>110</y>
+       <y>90</y>
        <width>121</width>
        <height>18</height>
       </rect>

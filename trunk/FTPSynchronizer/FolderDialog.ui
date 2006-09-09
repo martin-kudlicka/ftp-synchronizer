@@ -1,0 +1,104 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>qdFolderDialog</class>
+ <widget class="QDialog" name="qdFolderDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>172</width>
+    <height>94</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Folder</string>
+  </property>
+  <widget class="QLabel" name="label" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>63</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Folder name:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="qleName" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>151</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="qpbOK" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>60</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="qpbCancel" >
+   <property name="geometry" >
+    <rect>
+     <x>90</x>
+     <y>60</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancel</string>
+   </property>
+  </widget>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>qpbOK</sender>
+   <signal>clicked()</signal>
+   <receiver>qdFolderDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>51</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>89</x>
+     <y>76</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>qpbCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>qdFolderDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>131</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>89</x>
+     <y>76</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

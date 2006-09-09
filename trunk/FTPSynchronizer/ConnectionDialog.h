@@ -9,9 +9,6 @@ class cConnectionDialog : public QDialog, public Ui::qdConnectionDialog
 
 	public:
 		cConnectionDialog();
-
-	private slots:
-		//void on_qaAddFTP_triggered();
 }; // cConnectionDialog
 
 #endif

@@ -2,7 +2,6 @@
 
 #include <QStack>
 
-const QString qsBOTH_WAYS = "Both ways";
 const QString qsDOWNLOAD = "Download";
 const QString qsUPLOAD = "Upload";
 
@@ -37,62 +36,88 @@ cMainWindow::cMainWindow()
 } // cMainWindow
 
 // connection dialog accepted - make changes
-void cMainWindow::ConnectionDialogAccepted(const cConnectionDialog *ccdNewConnection, const eModify emModify)
+void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdNewConnection,
+																	const cFolderDialog *cfdNewFolder,
+																	const eModify emModify)
 {
-	QDomNode qdnNewConnection, qdnSelected;
-	QString qsSynchronization;
-	QTreeWidgetItem *qtwiNewConnection, *qtwiSelected;
+	QDomNode qdnNewItem, qdnSelected;
+	QTreeWidgetItem *qtwiNewItem, *qtwiSelected;
 
-	// send to cConnections
+	// get selected item in tree and XML
 	qtwiSelected = qtwConnections->currentItem();
 	if (qtwiSelected) {
 		qdnSelected = qhTable.value(qtwiSelected);
 	} // if
-	if (ccdNewConnection->rbUpload->isChecked()) {
-		qsSynchronization = qsUPLOAD;
-	} else {
-		if (ccdNewConnection->rbDownload->isChecked()) {
-			qsSynchronization = qsDOWNLOAD;
+
+	if (ccdNewConnection) {
+		// connection
+		QString qsSynchronization;
+
+		if (ccdNewConnection->rbUpload->isChecked()) {
+			qsSynchronization = qsUPLOAD;
 		} else {
-			qsSynchronization = qsBOTH_WAYS;
+			qsSynchronization = qsDOWNLOAD;
 		} // if else
+		qdnNewItem = ccConnections.ModifyConnection(emModify,
+																  qdnSelected,
+																  // Connection
+																  ccdNewConnection->qleName->text(),
+																  ccdNewConnection->qleSource->text(),
+																  ccdNewConnection->qleSourceUsername->text(),
+																  ccdNewConnection->qleSourcePassword->text(),
+																  ccdNewConnection->qleDestination->text(),
+																  ccdNewConnection->qleDestinationUsername->text(),
+																  ccdNewConnection->qleDestinationUsername->text(),
+																  // Settings
+																  ccdNewConnection->cbIncludeSubdirectories->isChecked(),
+																  // Synchronization
+																  qsSynchronization,
+																  ccdNewConnection->cbDeleteObsoleteFiles->isChecked());
+	} else {
+		// folder
+		qdnNewItem = ccConnections.ModifyFolder(emModify,
+															 qdnSelected,
+															 // properties
+															 cfdNewFolder->qleName->text());
 	} // if else
-	qdnNewConnection = ccConnections.ModifyConnection(emModify,
-																	  qdnSelected,
-																	  // Connection
-																	  ccdNewConnection->qleName->text(),
-																	  ccdNewConnection->qleSource->text(),
-																	  ccdNewConnection->qleSourceUsername->text(),
-																	  ccdNewConnection->qleSourcePassword->text(),
-																	  ccdNewConnection->qleDestination->text(),
-																	  ccdNewConnection->qleDestinationUsername->text(),
-																	  ccdNewConnection->qleDestinationUsername->text(),
-																	  // Settings
-																	  ccdNewConnection->cbIncludeSubdirectories->isChecked(),
-																	  // Synchronization
-																	  qsSynchronization,
-																	  ccdNewConnection->cbDeleteObsoleteFiles->isChecked());
+
 	if (emModify == Add) {
 		// add to TreeWidget
 		if (!qtwiSelected) {
-			qtwiNewConnection = new QTreeWidgetItem(qtwConnections);
+			qtwiNewItem = new QTreeWidgetItem(qtwConnections);
 		} else {
 			if (ccConnections.GetProperty(qdnSelected, Type) == qsFOLDER) {
-				qtwiNewConnection = new QTreeWidgetItem(qtwiSelected);
+				qtwiNewItem = new QTreeWidgetItem(qtwiSelected);
 			} else {
 				if (qtwiSelected->parent()) {
-					qtwiNewConnection = new QTreeWidgetItem(qtwiSelected->parent(), qtwiSelected);
+					qtwiNewItem = new QTreeWidgetItem(qtwiSelected->parent(), qtwiSelected);
 				} else {
-					qtwiNewConnection = new QTreeWidgetItem(qtwConnections, qtwiSelected);
+					qtwiNewItem = new QTreeWidgetItem(qtwConnections, qtwiSelected);
 				} // if else
 			} // if else
 		} // if else
-		qtwiNewConnection->setText(0, ccdNewConnection->qleName->text());
-	} // if
+		if (ccdNewConnection) {
+			qtwiNewItem->setText(0, ccdNewConnection->qleName->text());
+		} else {
+			qtwiNewItem->setText(0, cfdNewFolder->qleName->text());
+		} // if else
 
-	// to hash table
-	qhTable.insert(qtwiNewConnection, qdnNewConnection);
-} // ConnectionDialogAccepted
+		// to hash table
+		qhTable.insert(qtwiNewItem, qdnNewItem);
+	} else {
+		// modify TreeWidget
+		if (ccdNewConnection) {
+			qtwiSelected->setText(0, ccdNewConnection->qleName->text());
+		} else {
+			qtwiSelected->setText(0, cfdNewFolder->qleName->text());
+		} // if else
+
+		// to hash table
+		qhTable.insert(qtwiSelected, qdnNewItem);
+		// actualize information about selected connection
+		ShowInfo(qtwiSelected);
+	} // if else
+} // ConnectionOrFolderDialogAccepted
 
 // add new connection
 void cMainWindow::on_qaAddConnection_triggered()
@@ -101,14 +126,19 @@ void cMainWindow::on_qaAddConnection_triggered()
 
 	ccdNewConnection = new cConnectionDialog();
 	if (ccdNewConnection->exec() == QDialog::Accepted) {
-		ConnectionDialogAccepted(ccdNewConnection, Add);
+		ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Add);
 	} // if
 } // on_qaAddConnection_triggered
 
 // add new folder
 void cMainWindow::on_qaAddFolder_triggered()
 {
-	// TODO on_qaAddFolder_triggered
+	cFolderDialog *cfdNewFolder;
+
+	cfdNewFolder = new cFolderDialog();
+	if (cfdNewFolder->exec() == QDialog::Accepted) {
+		ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, Add);
+	} // if
 } // on_qaAddFolder_triggered
 
 // edit existing connection
@@ -142,11 +172,7 @@ void cMainWindow::on_qaEdit_triggered()
 	if (qsProperty == qsUPLOAD) {
 		ccdNewConnection->rbUpload->setChecked(true);
 	} else {
-		if (qsProperty == qsDOWNLOAD) {
-			ccdNewConnection->rbDownload->setChecked(true);
-		} else {
-			ccdNewConnection->rbBothWays->setChecked(true);
-		} // if else
+		ccdNewConnection->rbDownload->setChecked(true);
 	} // if else
 	qsProperty = ccConnections.GetProperty(qdnConnection, DeleteObsoleteFiles);
 	if (qsProperty == qsTRUE) {
@@ -156,34 +182,44 @@ void cMainWindow::on_qaEdit_triggered()
 	} // if else
 
 	if (ccdNewConnection->exec() == QDialog::Accepted) {
-		ConnectionDialogAccepted(ccdNewConnection, Modify);
+		ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Modify);
 	} // if
 } // on_qaEdit_triggered
 
 // remove folder or connection
 void cMainWindow::on_qaRemove_triggered()
 {
-	// TODO on_qaRemove_triggered
+	QDomNode qdnSelected;
+	QTreeWidgetItem *qtwiSelected;
+
+	qtwiSelected = qtwConnections->currentItem();
+	qdnSelected = qhTable.value(qtwiSelected);
+	ccConnections.Remove(qdnSelected);
+	qtwiSelected->~QTreeWidgetItem();
 } // on_qaRemove_triggered
 
 // another item selcted in tree view
 void cMainWindow::on_qtwConnections_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
-	//if (current) {
+	if (current) {
 		// context menu
 		qaContextEdit->setEnabled(true);
 		qaContextRemove->setEnabled(true);
 		// main menu
 		qaEdit->setEnabled(true);
 		qaRemove->setEnabled(true);
-	/*} else {
+		// show info about selected item
+		ShowInfo(current);
+	} else {
 		// context menu
 		qaContextEdit->setEnabled(false);
 		qaContextRemove->setEnabled(false);
 		// main menu
 		qaEdit->setEnabled(false);
 		qaRemove->setEnabled(false);
-	} // if else*/
+		// clear info
+		ShowInfo(NULL);
+	} // if else
 } // on_qtwConnections_currentItemChanged
 
 // context menu on connection tree view
@@ -229,3 +265,21 @@ void cMainWindow::ShowConnectionTree()
 		} // if else
 	} // while
 } // ShowConnectionTree
+
+// show info about selected item
+void cMainWindow::ShowInfo(QTreeWidgetItem *qtwiSelected)
+{
+	if (qtwiSelected) {
+		QDomNode qdnSelected;
+
+		qdnSelected = qhTable.value(qtwiSelected);
+		if (ccConnections.GetProperty(qdnSelected, Type) == qsCONNECTION) {
+			qteConnectionInfo->setPlainText("Source: " + ccConnections.GetProperty(qdnSelected, Source) + "\n"
+													  "Destination: " + ccConnections.GetProperty(qdnSelected, Destination));
+		} else {
+			qteConnectionInfo->clear();
+		} // if else
+	} else {
+		qteConnectionInfo->clear();
+	} // if else
+} // ShowInfo
