@@ -1,0 +1,185 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>qmwMainWindow</class>
+ <widget class="QMainWindow" name="qmwMainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>471</width>
+    <height>426</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>FTP Synchronizer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <widget class="QSplitter" name="splitter_2" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>451</width>
+      <height>385</height>
+     </rect>
+    </property>
+    <property name="orientation" >
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="childrenCollapsible" >
+     <bool>false</bool>
+    </property>
+    <widget class="QSplitter" name="qsLeftSplitter" >
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="handleWidth" >
+      <number>2</number>
+     </property>
+     <property name="childrenCollapsible" >
+      <bool>false</bool>
+     </property>
+     <widget class="QTreeWidget" name="qtwConnections" >
+      <property name="contextMenuPolicy" >
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="textEdit" >
+      <property name="readOnly" >
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="verticalLayout" >
+     <layout class="QVBoxLayout" >
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <property name="spacing" >
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QTextEdit" name="textEdit_2" >
+        <property name="readOnly" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar" >
+        <property name="textVisible" >
+         <bool>false</bool>
+        </property>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>471</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp" >
+    <property name="title" >
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionAbout" />
+   </widget>
+   <widget class="QMenu" name="menuEdit" >
+    <property name="title" >
+     <string>&amp;Edit</string>
+    </property>
+    <widget class="QMenu" name="menuAdd" >
+     <property name="title" >
+      <string>&amp;Add</string>
+     </property>
+     <addaction name="qaAddConnection" />
+     <addaction name="qaAddFolder" />
+    </widget>
+    <addaction name="menuAdd" />
+    <addaction name="qaEdit" />
+    <addaction name="qaRemove" />
+   </widget>
+   <addaction name="menuFile" />
+   <addaction name="menuEdit" />
+   <addaction name="menuHelp" />
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <widget class="QToolBar" name="toolBar" >
+   <property name="orientation" >
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <attribute name="toolBarArea" >
+    <number>4</number>
+   </attribute>
+   <addaction name="qaStart" />
+   <addaction name="qaPause" />
+   <addaction name="qaStop" />
+  </widget>
+  <action name="qaStart" >
+   <property name="text" >
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="qaPause" >
+   <property name="text" >
+    <string>Pause</string>
+   </property>
+  </action>
+  <action name="qaStop" >
+   <property name="text" >
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="qaAddConnection" >
+   <property name="text" >
+    <string>&amp;Connection</string>
+   </property>
+  </action>
+  <action name="qaAddFolder" >
+   <property name="text" >
+    <string>F&amp;older</string>
+   </property>
+  </action>
+  <action name="actionAbout" >
+   <property name="text" >
+    <string>&amp;About</string>
+   </property>
+  </action>
+  <action name="qaRemove" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Remove</string>
+   </property>
+  </action>
+  <action name="qaEdit" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>&amp;Edit</string>
+   </property>
+  </action>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <resources/>
+ <connections/>
+</ui>

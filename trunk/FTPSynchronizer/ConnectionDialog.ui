@@ -1,0 +1,388 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>qdConnectionDialog</class>
+ <widget class="QDialog" name="qdConnectionDialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>468</width>
+    <height>285</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Connection settings</string>
+  </property>
+  <widget class="QPushButton" name="qpbCancel" >
+   <property name="geometry" >
+    <rect>
+     <x>380</x>
+     <y>250</y>
+     <width>77</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="qpbOK" >
+   <property name="geometry" >
+    <rect>
+     <x>300</x>
+     <y>250</y>
+     <width>77</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="tabWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>451</width>
+     <height>231</height>
+    </rect>
+   </property>
+   <property name="currentIndex" >
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="tab" >
+    <attribute name="title" >
+     <string>Connection</string>
+    </attribute>
+    <widget class="QLabel" name="label" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>46</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Source:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>46</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Name:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>58</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Destination:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="qleSource" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>40</y>
+       <width>351</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="qleName" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>10</y>
+       <width>351</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>70</y>
+       <width>52</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Username:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5" >
+     <property name="geometry" >
+      <rect>
+       <x>260</x>
+       <y>70</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Password:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6" >
+     <property name="geometry" >
+      <rect>
+       <x>260</x>
+       <y>130</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Password:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>130</y>
+       <width>52</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Username:</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_3" >
+     <property name="geometry" >
+      <rect>
+       <x>320</x>
+       <y>170</y>
+       <width>111</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Display passwords</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="qleSourcePassword" >
+     <property name="geometry" >
+      <rect>
+       <x>320</x>
+       <y>70</y>
+       <width>111</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="echoMode" >
+      <enum>QLineEdit::Password</enum>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="qleDestination" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>100</y>
+       <width>351</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="qleDestinationUsername" >
+     <property name="geometry" >
+      <rect>
+       <x>140</x>
+       <y>130</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="qleDestinationPassword" >
+     <property name="geometry" >
+      <rect>
+       <x>320</x>
+       <y>130</y>
+       <width>111</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="echoMode" >
+      <enum>QLineEdit::Password</enum>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="qleSourceUsername" >
+     <property name="geometry" >
+      <rect>
+       <x>140</x>
+       <y>70</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_2" >
+    <attribute name="title" >
+     <string>Settings</string>
+    </attribute>
+    <widget class="QCheckBox" name="cbIncludeSubdirectories" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>131</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Include subdirectories</string>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_3" >
+    <attribute name="title" >
+     <string>Synchronization</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>120</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Type</string>
+     </property>
+     <widget class="QRadioButton" name="rbUpload" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>83</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Upload</string>
+      </property>
+      <property name="checked" >
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rbDownload" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>83</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Download</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="rbBothWays" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>83</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Both ways</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QCheckBox" name="cbDeleteObsoleteFiles" >
+     <property name="geometry" >
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>121</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Delete obsolete files</string>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>qpbOK</tabstop>
+  <tabstop>qpbCancel</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>qleName</tabstop>
+  <tabstop>qleSource</tabstop>
+  <tabstop>qleDestination</tabstop>
+  <tabstop>qleSourceUsername</tabstop>
+  <tabstop>qleSourcePassword</tabstop>
+  <tabstop>qleDestinationUsername</tabstop>
+  <tabstop>qleDestinationPassword</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>qpbOK</sender>
+   <signal>clicked()</signal>
+   <receiver>qdConnectionDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>272</x>
+     <y>292</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>203</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>qpbCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>qdConnectionDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>352</x>
+     <y>292</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>203</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
