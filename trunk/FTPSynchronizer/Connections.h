@@ -8,24 +8,25 @@ const QString qsCONNECTION = "Connection";
 const QString qsFOLDER = "Folder";
 const QString qsTRUE = "True";
 
-enum eModify {Add, Modify};
-enum eProperty {DeleteObsoleteFiles,
-					 Destination,
-					 DestinationPassword,
-					 DestinationUsername,
-					 IncludeSubdirectories,
-					 Name,
-					 Source,
-					 SynchronizationType,
-					 Type};
-
 class cConnections
 {
 	public:
+		enum eModify {Add, Modify};
+		enum eProperty {DeleteObsoleteFiles,
+							 DestinationPath,
+							 DestinationPassword,
+							 DestinationUsername,
+							 IncludeSubdirectories,
+							 Name,
+							 SourcePath,
+							 SynchronizationType,
+							 Type};
+
 		QDomDocument qddXML;
 
 		cConnections();
 
+		QDomNode FindConnection(const QString qsName);
 		QString GetProperty(const QDomNode qdnConnection,
 								  const eProperty epProperty);
 		QDomNode ModifyConnection(const eModify emModify,

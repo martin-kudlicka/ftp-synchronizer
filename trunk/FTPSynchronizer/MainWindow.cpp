@@ -1,11 +1,9 @@
 #include "MainWindow.h"
 
 #include <QStack>
+#include <QScrollBar>
 
-const QString qsDOWNLOAD = "Download";
 const QString qsUPLOAD = "Upload";
-
-const unsigned int uiTOOL_BAR_POSITION = 1;
 
 // create of main window
 cMainWindow::cMainWindow()
@@ -14,8 +12,10 @@ cMainWindow::cMainWindow()
 	QTreeWidgetItem *qtwiHeader;
 
 	setupUi(this);
+
 	// reposition toolbar into left splitter
 	qsLeftSplitter->insertWidget(uiTOOL_BAR_POSITION, toolBar);
+
 	// create qtwFTP context menu
 	qmConnection = new QMenu(qtwConnections);
 	qmConnectionAdd = new QMenu(tr("&Add"), qmConnection);
@@ -26,6 +26,7 @@ cMainWindow::cMainWindow()
 	qaContextEdit->setEnabled(false);
 	qaContextRemove = qmConnection->addAction(tr("&Remove"), this, SLOT(on_qaRemove_triggered()));
 	qaContextRemove->setEnabled(false);
+
 	// show connection tree
 	qtwiHeader = new QTreeWidgetItem();
 	qtwiHeader->setText(0, tr("Connections"));
@@ -36,7 +37,7 @@ cMainWindow::cMainWindow()
 // connection dialog accepted - make changes
 void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdNewConnection,
 																	const cFolderDialog *cfdNewFolder,
-																	const eModify emModify)
+																	const cConnections::eModify emModify)
 {
 	QDomNode qdnNewItem, qdnSelected;
 	QTreeWidgetItem *qtwiNewItem, *qtwiSelected;
@@ -63,7 +64,7 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 																  ccdNewConnection->qleSource->text(),
 																  ccdNewConnection->qleDestination->text(),
 																  ccdNewConnection->qleDestinationUsername->text(),
-																  ccdNewConnection->qleDestinationUsername->text(),
+																  ccdNewConnection->qleDestinationPassword->text(),
 																  // Settings
 																  ccdNewConnection->cbIncludeSubdirectories->isChecked(),
 																  // Synchronization
@@ -77,12 +78,12 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 															 cfdNewFolder->qleName->text());
 	} // if else
 
-	if (emModify == Add) {
+	if (emModify == cConnections::Add) {
 		// add to QTreeWidget
 		if (!qtwiSelected) {
 			qtwiNewItem = new QTreeWidgetItem(qtwConnections);
 		} else {
-			if (ccConnections.GetProperty(qdnSelected, Type) == qsFOLDER) {
+			if (ccConnections.GetProperty(qdnSelected, cConnections::Type) == qsFOLDER) {
 				qtwiNewItem = new QTreeWidgetItem(qtwiSelected);
 			} else {
 				if (qtwiSelected->parent()) {
@@ -121,12 +122,19 @@ bool cMainWindow::IsFolder(QTreeWidgetItem *qtwiItem)
 	QDomNode qdnNode;
 
 	qdnNode = qhTable.value(qtwiItem);
-	if (ccConnections.GetProperty(qdnNode, Type) == qsFOLDER) {
+	if (ccConnections.GetProperty(qdnNode, cConnections::Type) == qsFOLDER) {
 		return true;
 	} else {
 		return false;
 	} // if else
 } // IsFolder
+
+// message from Synchronize class
+void cMainWindow::on_cSynchronize_Message(const QString qsMessage)
+{
+	qteLog->insertPlainText(QString("%1\n").arg(qsMessage));
+	qteLog->verticalScrollBar()->setValue(qteLog->verticalScrollBar()->maximum());
+} // on_cSynchronize_Message
 
 // add new connection
 void cMainWindow::on_qaAddConnection_triggered()
@@ -135,7 +143,7 @@ void cMainWindow::on_qaAddConnection_triggered()
 
 	ccdNewConnection = new cConnectionDialog();
 	if (ccdNewConnection->exec() == QDialog::Accepted) {
-		ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Add);
+		ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, cConnections::Add);
 	} // if
 
 	ccdNewConnection->deleteLater();
@@ -148,7 +156,7 @@ void cMainWindow::on_qaAddFolder_triggered()
 
 	cfdNewFolder = new cFolderDialog();
 	if (cfdNewFolder->exec() == QDialog::Accepted) {
-		ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, Add);
+		ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, cConnections::Add);
 	} // if
 
 	cfdNewFolder->deleteLater();
@@ -166,10 +174,10 @@ void cMainWindow::on_qaEdit_triggered()
 		cfdNewFolder = new cFolderDialog();
 
 		// fill values
-		cfdNewFolder->qleName->setText(ccConnections.GetProperty(qdnFolder, Name));
+		cfdNewFolder->qleName->setText(ccConnections.GetProperty(qdnFolder, cConnections::Name));
 
 		if (cfdNewFolder->exec() == QDialog::Accepted) {
-			ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, Modify);
+			ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, cConnections::Modify);
 		} // if
 
 		cfdNewFolder->deleteLater();
@@ -184,26 +192,26 @@ void cMainWindow::on_qaEdit_triggered()
 
 		// fill values
 		// Connection
-		ccdNewConnection->qleName->setText(ccConnections.GetProperty(qdnConnection, Name));
-		ccdNewConnection->qleSource->setText(ccConnections.GetProperty(qdnConnection, Source));
-		ccdNewConnection->qleDestination->setText(ccConnections.GetProperty(qdnConnection, Destination));
-		ccdNewConnection->qleDestinationUsername->setText(ccConnections.GetProperty(qdnConnection, DestinationUsername));
-		ccdNewConnection->qleDestinationPassword->setText(ccConnections.GetProperty(qdnConnection, DestinationPassword));
+		ccdNewConnection->qleName->setText(ccConnections.GetProperty(qdnConnection, cConnections::Name));
+		ccdNewConnection->qleSource->setText(ccConnections.GetProperty(qdnConnection, cConnections::SourcePath));
+		ccdNewConnection->qleDestination->setText(ccConnections.GetProperty(qdnConnection, cConnections::DestinationPath));
+		ccdNewConnection->qleDestinationUsername->setText(ccConnections.GetProperty(qdnConnection, cConnections::DestinationUsername));
+		ccdNewConnection->qleDestinationPassword->setText(ccConnections.GetProperty(qdnConnection, cConnections::DestinationPassword));
 		// Settings
-		qsProperty = ccConnections.GetProperty(qdnConnection, IncludeSubdirectories);
+		qsProperty = ccConnections.GetProperty(qdnConnection, cConnections::IncludeSubdirectories);
 		if (qsProperty == qsTRUE) {
 			ccdNewConnection->cbIncludeSubdirectories->setChecked(true);
 		} else {
 			ccdNewConnection->cbIncludeSubdirectories->setChecked(false);
 		} // if else
 		// Synchronization
-		qsProperty = ccConnections.GetProperty(qdnConnection, SynchronizationType);
+		qsProperty = ccConnections.GetProperty(qdnConnection, cConnections::SynchronizationType);
 		if (qsProperty == qsUPLOAD) {
 			ccdNewConnection->rbUpload->setChecked(true);
 		} else {
 			ccdNewConnection->rbDownload->setChecked(true);
 		} // if else
-		qsProperty = ccConnections.GetProperty(qdnConnection, DeleteObsoleteFiles);
+		qsProperty = ccConnections.GetProperty(qdnConnection, cConnections::DeleteObsoleteFiles);
 		if (qsProperty == qsTRUE) {
 			ccdNewConnection->cbDeleteObsoleteFiles->setChecked(true);
 		} else {
@@ -211,7 +219,7 @@ void cMainWindow::on_qaEdit_triggered()
 		} // if else
 
 		if (ccdNewConnection->exec() == QDialog::Accepted) {
-			ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Modify);
+			ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, cConnections::Modify);
 		} // if
 
 		ccdNewConnection->deleteLater();
@@ -229,6 +237,48 @@ void cMainWindow::on_qaRemove_triggered()
 	ccConnections.Remove(qdnSelected);
 	delete qtwiSelected;
 } // on_qaRemove_triggered
+
+// start synchronization
+void cMainWindow::on_qaStart_triggered()
+{
+	cSynchronize csSynchronize;
+
+	// disable controls
+	qaStart->setEnabled(false);
+	qaStop->setEnabled(true);
+
+	csSynchronize.qsName = qtwConnections->currentItem()->text(0);
+	csSynchronize.ccConnections = &ccConnections;
+	csSynchronize.qmwGUI = this;
+	csSynchronize.Start();
+
+	// enable controls
+	qaStart->setEnabled(true);
+	qaStop->setEnabled(false);
+} // on_qsStart_triggered
+
+// destination FTP state change
+void cMainWindow::on_qfDestination_stateChanged(int state)
+{
+	QString qsStatus;
+
+	switch (state) {
+		case QFtp::Unconnected:	qsStatus = tr("There is no connection to the host.");
+										break;
+		case QFtp::HostLookup:	qsStatus = tr("A host name lookup is in progress.");
+										break;
+		case QFtp::Connecting:	qsStatus = tr("An attempt to connect to the host is in progress.");
+										break;
+		case QFtp::Connected:	qsStatus = tr("Connection to the host has been achieved.");
+										break;
+		case QFtp::LoggedIn:		qsStatus = tr("Connection and user login have been achieved.");
+										break;
+		case QFtp::Closing:		qsStatus = tr("The connection is closing down, but it is not yet closed.");
+										break;
+	} // switch
+
+	this->statusBar()->showMessage(qsStatus);
+} // on_qfDestination_stateChanged
 
 // another item selcted in tree view
 void cMainWindow::on_qtwConnections_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
@@ -285,17 +335,19 @@ void cMainWindow::ShowConnectionTree()
 		} else {
 			qtwiItem = new QTreeWidgetItem(qsTreeLevel.top());
 		} // if else
-		qtwiItem->setText(0, ccConnections.GetProperty(qdnConnection, Name));
+		qtwiItem->setText(0, ccConnections.GetProperty(qdnConnection, cConnections::Name));
 
 		// insert to table
 		qhTable.insert(qtwiItem, qdnConnection);
 
 		// go to the next one
-		if (ccConnections.GetProperty(qdnConnection, Type) == qsFOLDER && !qdnConnection.namedItem(qsCONNECTION).isNull()) {
+		if (ccConnections.GetProperty(qdnConnection, cConnections::Type) == qsFOLDER && !qdnConnection.namedItem(qsCONNECTION).isNull()) {
+			// non-empty folder
 			qsXMLLevel.push(qdnConnection);
 			qsTreeLevel.push(qtwiItem);
-			qdnConnection = qdnConnection.namedItem(qsCONNECTION);
+			qdnConnection = qdnConnection.firstChild();
 		} else {
+			// empty folder or connection
 			qdnConnection = qdnConnection.nextSibling();
 			while (qdnConnection.isNull() && !qsXMLLevel.isEmpty()) {
 				qdnConnection = qsXMLLevel.pop();
@@ -313,9 +365,9 @@ void cMainWindow::ShowInfo(QTreeWidgetItem *qtwiSelected)
 		QDomNode qdnSelected;
 
 		qdnSelected = qhTable.value(qtwiSelected);
-		if (ccConnections.GetProperty(qdnSelected, Type) == qsCONNECTION) {
-			qteConnectionInfo->setPlainText(tr("Source: ") + ccConnections.GetProperty(qdnSelected, Source) + "\n" +
-													  tr("Destination: ") + ccConnections.GetProperty(qdnSelected, Destination));
+		if (ccConnections.GetProperty(qdnSelected, cConnections::Type) == qsCONNECTION) {
+			qteConnectionInfo->setPlainText(tr("Source: ") + ccConnections.GetProperty(qdnSelected, cConnections::SourcePath) + "\n" +
+													  tr("Destination: ") + ccConnections.GetProperty(qdnSelected, cConnections::DestinationPath));
 		} else {
 			qteConnectionInfo->clear();
 		} // if else

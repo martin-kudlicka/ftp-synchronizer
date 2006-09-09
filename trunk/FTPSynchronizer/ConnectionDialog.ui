@@ -93,16 +93,6 @@
       </rect>
      </property>
     </widget>
-    <widget class="QLineEdit" name="qleName" >
-     <property name="geometry" >
-      <rect>
-       <x>80</x>
-       <y>10</y>
-       <width>351</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_2" >
      <property name="geometry" >
       <rect>
@@ -188,6 +178,16 @@
       <string>Display password</string>
      </property>
     </widget>
+    <widget class="QLineEdit" name="qleName" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>10</y>
+       <width>351</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tab_2" >
     <attribute name="title" >
@@ -226,7 +226,7 @@
      <property name="title" >
       <string>Type</string>
      </property>
-     <widget class="QRadioButton" name="rbUpload" >
+     <widget class="QRadioButton" name="rbDownload" >
       <property name="geometry" >
        <rect>
         <x>10</x>
@@ -236,13 +236,13 @@
        </rect>
       </property>
       <property name="text" >
-       <string>Upload</string>
+       <string>Download</string>
       </property>
       <property name="checked" >
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QRadioButton" name="rbDownload" >
+     <widget class="QRadioButton" name="rbUpload" >
       <property name="geometry" >
        <rect>
         <x>10</x>
@@ -252,7 +252,10 @@
        </rect>
       </property>
       <property name="text" >
-       <string>Download</string>
+       <string>Upload</string>
+      </property>
+      <property name="checked" >
+       <bool>false</bool>
       </property>
      </widget>
     </widget>

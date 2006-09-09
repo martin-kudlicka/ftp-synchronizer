@@ -1,6 +1,7 @@
 #include "Connections.h"
 
 #include "../../Common/XMLTools.h"
+#include <QStack>
 
 const QString qsCONNECTIONS_FILE = "Connections.xml";
 const QString qsDELETE_OBSOLETE_FILES = "DeleteObsoleteFiles";
@@ -55,18 +56,49 @@ cConnections::cConnections()
 	} // if
 } // cConnections
 
+// find connection in XML file by it's name
+QDomNode cConnections::FindConnection(const QString qsName)
+{
+	QDomNode qdnNode;
+	QStack<QDomNode> qsXMLLevel;
+
+	qdnNode = qddXML.documentElement().firstChild();
+
+	while (!qdnNode.isNull()) {
+		if (GetProperty(qdnNode, Type) == qsFOLDER && !qdnNode.namedItem(qsCONNECTION).isNull()) {
+			// non-empty folder
+			qsXMLLevel.push(qdnNode);
+			qdnNode = qdnNode.firstChild();
+		} else {
+			// empty folder or connection
+			if (GetProperty(qdnNode, Type) == qsCONNECTION && GetProperty(qdnNode, Name) == qsName) {
+				// found
+				break;
+			} // if
+
+			qdnNode = qdnNode.nextSibling();
+			while (qdnNode.isNull() && !qsXMLLevel.isEmpty()) {
+				qdnNode = qsXMLLevel.pop();
+				qdnNode = qdnNode.nextSibling();
+			} // while
+		} // if else
+	} // while
+
+	return qdnNode;
+} // FindConnection
+
 // returns information about connection
 QString cConnections::GetProperty(const QDomNode qdnConnection,
 											 const eProperty epProperty)
 {
 	switch (epProperty) {
 		case DeleteObsoleteFiles:		return qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsDELETE_OBSOLETE_FILES).toElement().text();
-		case Destination:					return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPATH).toElement().text();
+		case DestinationPath:			return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPATH).toElement().text();
 		case DestinationPassword:		return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPASSWORD).toElement().text();
 		case DestinationUsername:		return qdnConnection.namedItem(qsDESTINATION).namedItem(qsUSERNAME).toElement().text();
 		case IncludeSubdirectories:	return qdnConnection.namedItem(qsSETTINGS).namedItem(qsINCLUDE_SUBDIRECTORIES).toElement().text();
 		case Name:							return qdnConnection.namedItem(qsNAME).toElement().text();
-		case Source:						return qdnConnection.namedItem(qsSOURCE).namedItem(qsPATH).toElement().text();
+		case SourcePath:					return qdnConnection.namedItem(qsSOURCE).namedItem(qsPATH).toElement().text();
 		case SynchronizationType:		return qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsTYPE).toElement().text();
 		case Type:							return qdnConnection.toElement().attributeNode(qsTYPE).value();
 	}; // switch
