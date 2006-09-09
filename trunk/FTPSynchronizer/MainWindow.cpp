@@ -129,6 +129,14 @@ bool cMainWindow::IsFolder(QTreeWidgetItem *qtwiItem)
 	} // if else
 } // IsFolder
 
+// synchronization done
+void cMainWindow::on_cSynchronize_Done()
+{
+	// enable controls
+	qaStart->setEnabled(true);
+	qaStop->setEnabled(false);
+} // on_cSynchronize_Done
+
 // message from Synchronize class
 void cMainWindow::on_cSynchronize_Message(const QString qsMessage)
 {
@@ -241,8 +249,6 @@ void cMainWindow::on_qaRemove_triggered()
 // start synchronization
 void cMainWindow::on_qaStart_triggered()
 {
-	cSynchronize csSynchronize;
-
 	// disable controls
 	qaStart->setEnabled(false);
 	qaStop->setEnabled(true);
@@ -251,11 +257,13 @@ void cMainWindow::on_qaStart_triggered()
 	csSynchronize.ccConnections = &ccConnections;
 	csSynchronize.qmwGUI = this;
 	csSynchronize.Start();
-
-	// enable controls
-	qaStart->setEnabled(true);
-	qaStop->setEnabled(false);
 } // on_qsStart_triggered
+
+// interrupt synchronization
+void cMainWindow::on_qaStop_triggered()
+{
+	emit StopSynchronization();
+} // on_qaStop_triggered
 
 // destination FTP state change
 void cMainWindow::on_qfDestination_stateChanged(int state)

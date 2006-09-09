@@ -5,7 +5,7 @@
 
 class cFolderDialog : public QDialog, public Ui::qdFolderDialog
 {
-	Q_OBJECT;
+	Q_OBJECT
 
 	public:
 		cFolderDialog();

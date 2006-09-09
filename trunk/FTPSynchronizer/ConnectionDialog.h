@@ -5,7 +5,7 @@
 
 class cConnectionDialog : public QDialog, public Ui::qdConnectionDialog
 {
-	Q_OBJECT;
+	Q_OBJECT
 
 	public:
 		cConnectionDialog();

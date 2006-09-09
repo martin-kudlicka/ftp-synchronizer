@@ -1,69 +1,196 @@
 #include "Synchronize.h"
 
-#include <QCoreApplication>
-
 // connect to FTP
 void cSynchronize::ConnectDestination()
 {
-	qfDestination->connectToHost(quDestination.host());
-	qfDestination->login(ccConnections->GetProperty(qdnConnection, cConnections::DestinationUsername),
+	qfDestination.connectToHost(quDestination.host());
+	qfDestination.login(ccConnections->GetProperty(qdnConnection, cConnections::DestinationUsername),
 								ccConnections->GetProperty(qdnConnection, cConnections::DestinationPassword));
 } // ConnectDestination
 
 // connect signals for GUI
 void cSynchronize::ConnectSignals()
 {
-	QObject::connect(qfDestination, SIGNAL(listInfo(const QUrlInfo &)),
+	QObject::connect(&qfDestination, SIGNAL(listInfo(const QUrlInfo &)),
 						  SLOT(on_qfDestination_listInfo(const QUrlInfo &)));
-	QObject::connect(qfDestination, SIGNAL(done(bool)), SLOT(on_qfDestination_done(bool)));
+	QObject::connect(&qfDestination, SIGNAL(done(bool)), SLOT(on_qfDestination_done(bool)));
+	QObject::connect(&qfDestination, SIGNAL(commandFinished(int, bool)), SLOT(on_qfDestination_commandFinished(int, bool)));
+	QObject::connect(&qfDestination, SIGNAL(commandStarted(int)), SLOT(on_qfDestination_commandStarted(int)));
 
 	// GUI only signals
 	if (bGUIRunning) {
-		QObject::connect(qfDestination, SIGNAL(stateChanged(int)),
+		QObject::connect(&qfDestination, SIGNAL(stateChanged(int)),
 							  qmwGUI, SLOT(on_qfDestination_stateChanged(int)));
 		QObject::connect(this, SIGNAL(SendGUIMessage(const QString)),
 							  qmwGUI, SLOT(on_cSynchronize_Message(const QString)));
+		QObject::connect(qmwGUI, SIGNAL(StopSynchronization()), this, SLOT(on_qmwGUI_StopSynchronization()));
+		QObject::connect(this, SIGNAL(Done()), qmwGUI, SLOT(on_cSynchronize_Done()));
 	} // if
 } // ConnectSignals
 
-// initialization
-cSynchronize::cSynchronize()
+// copy files to destination
+void cSynchronize::CopyFiles(const eDirection edDirection)
 {
-	qfDestination = new QFtp(this);
-	bFTPDestinationDone = false;
-} // cSynchronize
+	if (edDirection == Source) {
+		// copy to source
+		int iI;
+
+		for (iI = 0; iI < qqDestinationFiles.count() && !bStop; iI++) {
+			int iCommand;
+			QFile *qfFile;
+			sCommand scCommand;
+
+			qfFile = new QFile(quSource.path() + "/" + qqDestinationFiles.at(iI));
+			qfFile->open(QIODevice::WriteOnly);
+			scCommand.qfFile = qfFile;
+			scCommand.qsMessage = tr("Copying: %1").arg(qqDestinationFiles.at(iI));
+			iCommand = qfDestination.get(quDestination.path() + "/" + qqDestinationFiles.at(iI), qfFile);
+			qhCommands.insert(iCommand, scCommand);
+		} // for
+	} else {
+		// copy to destination
+		int iI;
+
+		for (iI = 0; iI < qqSourceFiles.count() && !bStop; iI++) {
+			int iCommand;
+			QFile *qfFile;
+			sCommand scCommand;
+
+			qfFile = new QFile(quSource.path() + "/" + qqSourceFiles.at(iI));
+			qfFile->open(QIODevice::ReadOnly);
+			scCommand.qfFile = qfFile;
+			scCommand.qsMessage = tr("Copying: %1").arg(qqSourceFiles.at(iI));
+			iCommand = qfDestination.put(qfFile, quDestination.path() + "/" + qqSourceFiles.at(iI));
+			qhCommands.insert(iCommand, scCommand);
+		} // for
+	} // if else
+} // CopyFiles
+
+// create destination directories
+void cSynchronize::CreateDirectories(const eDirection edDirection)
+{
+	if (edDirection == Source) {
+		// create on source
+		int iI;
+
+		for (iI = 0; iI < qqDestinationDirectories.count() && !bStop; iI++) {
+			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
+				QDir qdDir;
+
+				emit SendGUIMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
+				qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
+			} // if
+		} // for
+	} else {
+		// create on destination
+		int iI;
+
+		for (iI = 0; iI < qqSourceDirectories.count() && !bStop; iI++) {
+			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
+				emit SendGUIMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
+				qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI));
+			} // if
+		} // for
+	} // if else
+} // CreateDirectories
+
+// deinitialization class
+void cSynchronize::Deinitialization()
+{
+	DisconnectSignals();
+	if (!bGUIRunning) {
+		delete ccConnections;
+	} // if
+} // Deinitialization
+
+// delete obsolete files and folders
+void cSynchronize::DeleteObsolete(const eDirection edDirection)
+{
+	if (edDirection == Source) {
+		// delete on source
+		int iI;
+
+		// files
+		for (iI = 0; iI < qqSourceFiles.count() && !bStop; iI++) {
+			if (qqDestinationFiles.indexOf(qqSourceFiles.at(iI)) == -1) {
+				QFile qfFile;
+
+				qfFile.setFileName(quSource.path() + "/" + qqSourceFiles.at(iI));
+				emit SendGUIMessage(tr("Removing: %1").arg(qqSourceFiles.at(iI)));
+				qfFile.remove();
+			} // if
+		} // for
+
+		// directories
+		for (iI = qqSourceDirectories.count() - 1; iI >= 0 && !bStop; iI--) {
+			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
+				QDir qdDir;
+
+				emit SendGUIMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)));
+				qdDir.rmdir(quSource.path() + "/" + qqSourceDirectories.at(iI));
+			} // if
+		} // for
+	} else {
+		// delete on destination
+		int iI;
+
+		// files
+		for (iI = 0; iI < qqDestinationFiles.count() && !bStop; iI++) {
+			if (qqSourceFiles.indexOf(qqDestinationFiles.at(iI)) == -1) {
+				emit SendGUIMessage(tr("Removing: %1").arg(qqDestinationFiles.at(iI)));
+				qfDestination.remove(quDestination.path() + "/" + qqDestinationFiles.at(iI));
+			} // if
+		} // for
+
+		// directories
+		for (iI = qqDestinationDirectories.count() - 1 && !bStop; iI >= 0; iI--) {
+			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
+				emit SendGUIMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)));
+				qfDestination.rmdir(quDestination.path() + "/" + qqDestinationDirectories.at(iI));
+			} // if
+		} // for
+	} // if else
+} // DeleteObsolete
 
 // disconnect from FTP
 void cSynchronize::DisconnectDestination()
 {
-	qfDestination->close();
+	qfDestination.close();
 } // DisconnectDestination
+
+// break signals connection
+void cSynchronize::DisconnectSignals()
+{
+	qfDestination.disconnect();
+
+	// GUI only signals
+	if (bGUIRunning) {
+		disconnect();
+		qmwGUI->disconnect(SIGNAL(SendGUIMessage(const QString)));
+		qmwGUI->disconnect(SIGNAL(StopSynchronization()));
+	} // if
+} // DisconnectSignals
 
 // fills files and directories info
 void cSynchronize::GetFileList(const eDirection edDirection)
 {
-	bool bIncludeSubdirectories;
-	QString qsIncludeSubdirectories;
-
-	qsIncludeSubdirectories = ccConnections->GetProperty(qdnConnection, cConnections::IncludeSubdirectories);
-	if (qsIncludeSubdirectories == qsTRUE) {
-		bIncludeSubdirectories = true;
-	} else {
-		bIncludeSubdirectories = false;
-	} // if else
-
 	if (edDirection == Source) {
 		// source
+		bool bIncludeSubdirectories;
 		QDir qdSource;
-		QStack<QQueue<QString> > qsDirectoryLevel;
-		QString qsCurrentDirectory;
-		QStringList qslCurrentList;
+
+		if (ccConnections->GetProperty(qdnConnection, cConnections::IncludeSubdirectories) == qsTRUE) {
+			bIncludeSubdirectories = true;
+		} else {
+			bIncludeSubdirectories = false;
+		} // if else
 
 		qdSource.setPath(quSource.path());
 
 		do {
 			int iI;
 			QString qsDirectory;
+			QStringList qslCurrentList;
 
 			// list current directory for files
 			qslCurrentList = qdSource.entryList(QDir::Files);
@@ -90,113 +217,31 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 				qsCurrentDirectory +=  "../";
 			} // if else
 
-			qsDirectory = SetDirectory(&qsDirectoryLevel, &qsCurrentDirectory, NULL, &qdSource);
-			qdSource.cd(qsDirectory);
-			qsCurrentDirectory += qsDirectory + "/";
+			qsDirectory = SetDirectory(Source, &qdSource);
 			qsCurrentDirectory = QDir::cleanPath(qsCurrentDirectory);
 			if (qsCurrentDirectory.endsWith("..")) {
 				qsCurrentDirectory.clear();
 			} else {
-				qsCurrentDirectory += "/";
+				if (qsCurrentDirectory != "") {
+					qsCurrentDirectory += "/";
+				} // if
 			} // if else
-		} while (!qsDirectoryLevel.empty() && bIncludeSubdirectories);
+			qdSource.cd(qsDirectory);
+			if (qsDirectory != "") {
+				qsCurrentDirectory += qsDirectory + "/";
+			} // if
+		} while (!qsDirectoryLevel.empty() && bIncludeSubdirectories && !bStop);
 	} else {
 		// destination
-		QStack<QQueue<QString> > qsDirectoryLevel;
-		QString qsCurrentDirectory;
-
-		qfDestination->cd(quDestination.path());
-
-		do {
-			QString qsDirectory;
-
-			// list current directory and wait for result
-			qfDestination->list();
-			WaitForDestinationFTP();
-
-			// add files to global
-			while (!qqCurrentDestinationFiles.empty()) {
-				qqDestinationFiles += qsCurrentDirectory + qqCurrentDestinationFiles.dequeue();
-			} // while
-
-			// add directories to global and stack, go to antoher directory
-			if (!qqCurrentDestinationDirectories.empty()) {
-				qsDirectoryLevel.push(qqCurrentDestinationDirectories);
-				while (!qqCurrentDestinationDirectories.empty()) {
-					qqDestinationDirectories += qsCurrentDirectory + qqCurrentDestinationDirectories.dequeue();
-				} // while
-			} else {
-				// no directories -> go back
-				qfDestination->cd("..");
-				qsCurrentDirectory +=  "../";
-			} // if else
-
-			qsDirectory = SetDirectory(&qsDirectoryLevel, &qsCurrentDirectory, qfDestination, NULL);
-			qfDestination->cd(qsDirectory);
-			qsCurrentDirectory += qsDirectory + "/";
-			qsCurrentDirectory = QDir::cleanPath(qsCurrentDirectory);
-			if (qsCurrentDirectory.endsWith("..")) {
-				qsCurrentDirectory.clear();
-			} else {
-				qsCurrentDirectory += "/";
-			} // if else
-		} while (!qsDirectoryLevel.empty() && bIncludeSubdirectories);
+		qfDestination.cd(quDestination.path());
+		// list current directory
+		qfDestination.list();
+		// rest as in source in on_qfDestination_commandFinished
 	} // if else
 } // GetFileList
 
-// pending operations on FTP done
-void cSynchronize::on_qfDestination_done(bool error)
-{
-#ifdef _DEBUG
-	if (error) {
-		emit SendGUIMessage(tr("Error: %1").arg(qfDestination->errorString()));
-	} // if
-#endif
-	bFTPDestinationDone = true;
-} // on_qfDestination_done
-
-// searching for files and directories
-void cSynchronize::on_qfDestination_listInfo(const QUrlInfo &i)
-{
-	QString qsMessage;
-
-	qsMessage = tr("Destination: ");
-	if (i.isDir()) {
-		qsMessage += QString("[%1]").arg(i.name());
-		qqCurrentDestinationDirectories.enqueue(i.name());
-	} else {
-		qsMessage += i.name();
-		qqCurrentDestinationFiles.enqueue(i.name());
-	} // if else
-	emit SendGUIMessage(qsMessage);
-} // on_qfDestination_listInfo
-
-// get next directory from queue and optionally set right directory string with FTP level
-QString cSynchronize::SetDirectory(QStack<QQueue<QString> > *qsDirectoryLevel,
-											  QString *qsCurrentDirectory,
-											  QFtp *qfFTP,
-											  QDir *qdDir)
-{
-	QString qsNewDirectory;
-
-	while (!qsDirectoryLevel->empty() && qsDirectoryLevel->top().empty()) {
-		qsDirectoryLevel->pop();
-		if (qfFTP) {
-			qfFTP->cd("..");
-		} else {
-			qdDir->cd("..");
-		} // if else
-		*qsCurrentDirectory += "../";
-	} // while
-	if (!qsDirectoryLevel->empty()) {
-		qsNewDirectory = qsDirectoryLevel->top().dequeue();
-	} // if
-
-	return qsNewDirectory;
-} // SetDirectory
-
-// input class method - start of synchronization process
-void cSynchronize::Start()
+// initialize class
+void cSynchronize::Initialization()
 {
 	if (!ccConnections) {
 		ccConnections = new cConnections();
@@ -205,7 +250,167 @@ void cSynchronize::Start()
 		bGUIRunning = true;
 	} // if else
 
+	qqDestinationDirectories.clear();
+	qqDestinationFiles.clear();
+	qqSourceDirectories.clear();
+	qqSourceFiles.clear();
+	qsCurrentDirectory.clear();
+	qsDirectoryLevel.clear();
+	bStop = false;
 	ConnectSignals();
+} // Initialization
+
+// single FTP command finished
+void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
+{
+	// Close
+	if (qfDestination.currentCommand() == QFtp::Close) {
+		emit Done();
+		Deinitialization();
+		return;
+	} // if
+
+	// Get, Put
+	if (qfDestination.currentCommand() == QFtp::Get || qfDestination.currentCommand() == QFtp::Put) {
+		sCommand scCommand;
+
+		scCommand = qhCommands.value(id);
+		scCommand.qfFile->close();
+		scCommand.qfFile->deleteLater();
+		return;
+	} // if
+
+	// List
+	if (qfDestination.currentCommand() == QFtp::List) {
+		bool bIncludeSubdirectories;
+		QString qsDirectory;
+
+		// add files to global
+		while (!qqCurrentDestinationFiles.empty()) {
+			qqDestinationFiles += qsCurrentDirectory + qqCurrentDestinationFiles.dequeue();
+		} // while
+
+		// add directories to global and stack, go to antoher directory
+		if (!qqCurrentDestinationDirectories.empty()) {
+			qsDirectoryLevel.push(qqCurrentDestinationDirectories);
+			while (!qqCurrentDestinationDirectories.empty()) {
+				qqDestinationDirectories += qsCurrentDirectory + qqCurrentDestinationDirectories.dequeue();
+			} // while
+		} else {
+			// no directories -> go back
+			qfDestination.cd("..");
+			qsCurrentDirectory +=  "../";
+		} // if else
+
+		qsDirectory = SetDirectory(Destination);
+		qsCurrentDirectory = QDir::cleanPath(qsCurrentDirectory);
+		if (qsCurrentDirectory.endsWith("..")) {
+			qsCurrentDirectory.clear();
+		} else {
+			if (qsCurrentDirectory != "") {
+				qsCurrentDirectory += "/";
+			} // if
+		} // if else
+		if (qsDirectory != "") {
+			qsCurrentDirectory += qsDirectory + "/";
+		} // if
+
+		if (ccConnections->GetProperty(qdnConnection, cConnections::IncludeSubdirectories) == qsTRUE) {
+			bIncludeSubdirectories = true;
+		} else {
+			bIncludeSubdirectories = false;
+		} // if else
+
+		if (!qsDirectoryLevel.empty() && bIncludeSubdirectories && !bStop) {
+			// next round...
+#ifdef _DEBUG
+		emit SendGUIMessage(tr("Change: %1").arg(qsDirectory));
+#endif
+			qfDestination.cd(qsDirectory);
+			qfDestination.list();
+		} else {
+			// continue in synchronization
+			Synchronize2();
+		} // if else
+
+		return;
+	} // if
+} // on_qfDestination_commandFinished
+
+// single FTP command started
+void cSynchronize::on_qfDestination_commandStarted(int id)
+{
+	// Get, Put
+	if (qfDestination.currentCommand() == QFtp::Get || qfDestination.currentCommand() == QFtp::Put) {
+		sCommand scCommand;
+
+		scCommand = qhCommands.value(id);
+		emit SendGUIMessage(scCommand.qsMessage);
+
+		return;
+	} // if
+} // on_qfDestination_commandStarted
+
+// pending operations on FTP done
+void cSynchronize::on_qfDestination_done(bool error)
+{
+#ifdef _DEBUG
+	if (error) {
+		emit SendGUIMessage(tr("Error: %1").arg(qfDestination.errorString()));
+	} // if
+#endif
+} // on_qfDestination_done
+
+// searching for files and directories
+void cSynchronize::on_qfDestination_listInfo(const QUrlInfo &i)
+{
+	if (!i.isSymLink() && i.name() != "." && i.name() != "..") {
+		QString qsMessage;
+
+		qsMessage = tr("Destination: ");
+
+		if (i.isDir()) {
+			qsMessage += QString("[%1]").arg(i.name());
+			qqCurrentDestinationDirectories.enqueue(i.name());
+		} else {
+			qsMessage += i.name();
+			qqCurrentDestinationFiles.enqueue(i.name());
+		} // if else
+		emit SendGUIMessage(qsMessage);
+	} // if
+} // on_qfDestination_listInfo
+
+// stop synchronization by GUI control
+void cSynchronize::on_qmwGUI_StopSynchronization()
+{
+	bStop = true;
+} // on_qmwGUI_StopSynchronization
+
+// get next directory from queue and optionally set right directory string with FTP level
+QString cSynchronize::SetDirectory(const eDirection edDirection, QDir *qdDir /* NULL */)
+{
+	QString qsNewDirectory;
+
+	while (!qsDirectoryLevel.empty() && qsDirectoryLevel.top().empty()) {
+		qsDirectoryLevel.pop();
+		if (edDirection == Source) {
+			qdDir->cd("..");
+		} else {
+			qfDestination.cd("..");
+		} // if else
+		qsCurrentDirectory += "../";
+	} // while
+	if (!qsDirectoryLevel.empty()) {
+		qsNewDirectory = qsDirectoryLevel.top().dequeue();
+	} // if
+
+	return qsNewDirectory;
+} // SetDirectory
+
+// input class method - start of synchronization process
+void cSynchronize::Start()
+{
+	Initialization();
 
 	qdnConnection = ccConnections->FindConnection(qsName);
 	quSource = ccConnections->GetProperty(qdnConnection, cConnections::SourcePath);
@@ -213,67 +418,45 @@ void cSynchronize::Start()
 
 	ConnectDestination();
 
+	Synchronize();
+} // Start
+
+// get file and folder lists
+void cSynchronize::Synchronize()
+{
 	// get source and destination file list
 	emit SendGUIMessage(tr("Searching for files and folders..."));
 	// TODO infinite progress bar
 	GetFileList(Source);
 	GetFileList(Destination);
-
-	Synchronize();
-
-	// wait till file lists are filled
-	WaitForDestinationFTP();
-
-	DisconnectDestination();
-
-	if (!bGUIRunning) {
-		delete ccConnections;
-	} // if
-} // Start
-
-// main synchronization process
-void cSynchronize::Synchronize()
-{
-	// delete obsolete files and folders first
-	if (ccConnections->GetProperty(qdnConnection, cConnections::DeleteObsoleteFiles) == qsTRUE) {
-		if (ccConnections->GetProperty(qdnConnection, cConnections::SynchronizationType) == qsDOWNLOAD) {
-			// download
-			int iI;
-
-			// files
-			for (iI = 0; iI < qqSourceFiles.count(); iI++) {
-				if (qqDestinationFiles.indexOf(qqSourceFiles.at(iI)) == -1) {
-					QFile qfFile;
-
-					qfFile.setFileName(quSource.path() + "/" + qqSourceFiles.at(iI));
-					emit SendGUIMessage(tr("Removing: %1").arg(qqSourceFiles.at(iI)));
-					qfFile.remove();
-				} // if
-			} // for
-
-			// directories
-		} else {
-			// upload
-			int iI;
-
-			// files
-			for (iI = 0; iI < qqDestinationFiles.count(); iI++) {
-				if (qqSourceFiles.indexOf(qqDestinationFiles.at(iI)) == -1) {
-					emit SendGUIMessage(tr("Removing: %1").arg(qqDestinationFiles.at(iI)));
-					qfDestination->remove(quDestination.path() + "/" + qqDestinationFiles.at(iI));
-				} // if
-			} // for
-
-			// directories
-		} // if else
-	} // if
 } // Synchronize
 
-// wait till destination FTP makes all the work
-void cSynchronize::WaitForDestinationFTP()
+// the rest of synchronization process
+void cSynchronize::Synchronize2()
 {
-	while (!bFTPDestinationDone) {
-		QCoreApplication::processEvents();
-	} // while
-	bFTPDestinationDone = false;
-} // WaitForDestinationFTP
+	eDirection edDirection;
+
+	if (ccConnections->GetProperty(qdnConnection, cConnections::SynchronizationType) == qsDOWNLOAD) {
+		edDirection = Source;
+	} else {
+		edDirection = Destination;
+	} // if else
+
+	// delete obsolete files and folders first
+	if (ccConnections->GetProperty(qdnConnection, cConnections::DeleteObsoleteFiles) == qsTRUE) {
+		DeleteObsolete(edDirection);
+	} // if
+
+	// create directories
+	CreateDirectories(edDirection);
+
+	// copy files
+	CopyFiles(edDirection);
+
+	if (bStop) {
+		qfDestination.clearPendingCommands();
+	} // if
+
+	// disconnect
+	DisconnectDestination();
+} // Synchronize2
