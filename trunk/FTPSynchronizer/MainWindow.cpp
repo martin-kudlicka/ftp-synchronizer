@@ -14,8 +14,6 @@ cMainWindow::cMainWindow()
 	QTreeWidgetItem *qtwiHeader;
 
 	setupUi(this);
-	// disable status bar
-	setStatusBar(NULL);
 	// reposition toolbar into left splitter
 	qsLeftSplitter->insertWidget(uiTOOL_BAR_POSITION, toolBar);
 	// create qtwFTP context menu
@@ -30,7 +28,7 @@ cMainWindow::cMainWindow()
 	qaContextRemove->setEnabled(false);
 	// show connection tree
 	qtwiHeader = new QTreeWidgetItem();
-	qtwiHeader->setText(0, "Connections");
+	qtwiHeader->setText(0, tr("Connections"));
 	qtwConnections->setHeaderItem(qtwiHeader);
 	ShowConnectionTree();
 } // cMainWindow
@@ -63,8 +61,6 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 																  // Connection
 																  ccdNewConnection->qleName->text(),
 																  ccdNewConnection->qleSource->text(),
-																  ccdNewConnection->qleSourceUsername->text(),
-																  ccdNewConnection->qleSourcePassword->text(),
 																  ccdNewConnection->qleDestination->text(),
 																  ccdNewConnection->qleDestinationUsername->text(),
 																  ccdNewConnection->qleDestinationUsername->text(),
@@ -141,6 +137,8 @@ void cMainWindow::on_qaAddConnection_triggered()
 	if (ccdNewConnection->exec() == QDialog::Accepted) {
 		ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Add);
 	} // if
+
+	ccdNewConnection->deleteLater();
 } // on_qaAddConnection_triggered
 
 // add new folder
@@ -152,6 +150,8 @@ void cMainWindow::on_qaAddFolder_triggered()
 	if (cfdNewFolder->exec() == QDialog::Accepted) {
 		ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, Add);
 	} // if
+
+	cfdNewFolder->deleteLater();
 } // on_qaAddFolder_triggered
 
 // edit existing connection
@@ -171,6 +171,8 @@ void cMainWindow::on_qaEdit_triggered()
 		if (cfdNewFolder->exec() == QDialog::Accepted) {
 			ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, Modify);
 		} // if
+
+		cfdNewFolder->deleteLater();
 	} else {
 		// connection
 		cConnectionDialog *ccdNewConnection;
@@ -184,8 +186,6 @@ void cMainWindow::on_qaEdit_triggered()
 		// Connection
 		ccdNewConnection->qleName->setText(ccConnections.GetProperty(qdnConnection, Name));
 		ccdNewConnection->qleSource->setText(ccConnections.GetProperty(qdnConnection, Source));
-		ccdNewConnection->qleSourceUsername->setText(ccConnections.GetProperty(qdnConnection, SourceUsername));
-		ccdNewConnection->qleSourcePassword->setText(ccConnections.GetProperty(qdnConnection, SourcePassword));
 		ccdNewConnection->qleDestination->setText(ccConnections.GetProperty(qdnConnection, Destination));
 		ccdNewConnection->qleDestinationUsername->setText(ccConnections.GetProperty(qdnConnection, DestinationUsername));
 		ccdNewConnection->qleDestinationPassword->setText(ccConnections.GetProperty(qdnConnection, DestinationPassword));
@@ -213,6 +213,8 @@ void cMainWindow::on_qaEdit_triggered()
 		if (ccdNewConnection->exec() == QDialog::Accepted) {
 			ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Modify);
 		} // if
+
+		ccdNewConnection->deleteLater();
 	} // if else
 } // on_qaEdit_triggered
 
@@ -225,7 +227,7 @@ void cMainWindow::on_qaRemove_triggered()
 	qtwiSelected = qtwConnections->currentItem();
 	qdnSelected = qhTable.value(qtwiSelected);
 	ccConnections.Remove(qdnSelected);
-	qtwiSelected->~QTreeWidgetItem();
+	delete qtwiSelected;
 } // on_qaRemove_triggered
 
 // another item selcted in tree view
@@ -312,8 +314,8 @@ void cMainWindow::ShowInfo(QTreeWidgetItem *qtwiSelected)
 
 		qdnSelected = qhTable.value(qtwiSelected);
 		if (ccConnections.GetProperty(qdnSelected, Type) == qsCONNECTION) {
-			qteConnectionInfo->setPlainText("Source: " + ccConnections.GetProperty(qdnSelected, Source) + "\n"
-													  "Destination: " + ccConnections.GetProperty(qdnSelected, Destination));
+			qteConnectionInfo->setPlainText(tr("Source: ") + ccConnections.GetProperty(qdnSelected, Source) + "\n" +
+													  tr("Destination: ") + ccConnections.GetProperty(qdnSelected, Destination));
 		} else {
 			qteConnectionInfo->clear();
 		} // if else

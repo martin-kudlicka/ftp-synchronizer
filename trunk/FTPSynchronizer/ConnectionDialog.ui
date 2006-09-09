@@ -83,19 +83,6 @@
       <string>Name:</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_2" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>58</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Destination:</string>
-     </property>
-    </widget>
     <widget class="QLineEdit" name="qleSource" >
      <property name="geometry" >
       <rect>
@@ -116,50 +103,24 @@
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label_4" >
+    <widget class="QLabel" name="label_2" >
      <property name="geometry" >
       <rect>
-       <x>80</x>
+       <x>10</x>
        <y>70</y>
-       <width>52</width>
+       <width>58</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text" >
-      <string>Username:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5" >
-     <property name="geometry" >
-      <rect>
-       <x>260</x>
-       <y>70</y>
-       <width>51</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Password:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_6" >
-     <property name="geometry" >
-      <rect>
-       <x>260</x>
-       <y>130</y>
-       <width>51</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Password:</string>
+      <string>Destination:</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_7" >
      <property name="geometry" >
       <rect>
        <x>80</x>
-       <y>130</y>
+       <y>100</y>
        <width>52</width>
        <height>16</height>
       </rect>
@@ -168,24 +129,34 @@
       <string>Username:</string>
      </property>
     </widget>
-    <widget class="QCheckBox" name="checkBox_3" >
+    <widget class="QLineEdit" name="qleDestinationUsername" >
      <property name="geometry" >
       <rect>
-       <x>320</x>
-       <y>170</y>
-       <width>111</width>
-       <height>18</height>
+       <x>140</x>
+       <y>100</y>
+       <width>113</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6" >
+     <property name="geometry" >
+      <rect>
+       <x>260</x>
+       <y>100</y>
+       <width>51</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="text" >
-      <string>Display passwords</string>
+      <string>Password:</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="qleSourcePassword" >
+    <widget class="QLineEdit" name="qleDestinationPassword" >
      <property name="geometry" >
       <rect>
        <x>320</x>
-       <y>70</y>
+       <y>100</y>
        <width>111</width>
        <height>20</height>
       </rect>
@@ -198,43 +169,23 @@
      <property name="geometry" >
       <rect>
        <x>80</x>
-       <y>100</y>
+       <y>70</y>
        <width>351</width>
        <height>20</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLineEdit" name="qleDestinationUsername" >
+    <widget class="QCheckBox" name="checkBox_3" >
      <property name="geometry" >
       <rect>
-       <x>140</x>
-       <y>130</y>
-       <width>113</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="qleDestinationPassword" >
-     <property name="geometry" >
-      <rect>
-       <x>320</x>
+       <x>330</x>
        <y>130</y>
        <width>111</width>
-       <height>20</height>
+       <height>18</height>
       </rect>
      </property>
-     <property name="echoMode" >
-      <enum>QLineEdit::Password</enum>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="qleSourceUsername" >
-     <property name="geometry" >
-      <rect>
-       <x>140</x>
-       <y>70</y>
-       <width>113</width>
-       <height>20</height>
-      </rect>
+     <property name="text" >
+      <string>Display password</string>
      </property>
     </widget>
    </widget>
@@ -332,8 +283,6 @@
   <tabstop>qleName</tabstop>
   <tabstop>qleSource</tabstop>
   <tabstop>qleDestination</tabstop>
-  <tabstop>qleSourceUsername</tabstop>
-  <tabstop>qleSourcePassword</tabstop>
   <tabstop>qleDestinationUsername</tabstop>
   <tabstop>qleDestinationPassword</tabstop>
  </tabstops>

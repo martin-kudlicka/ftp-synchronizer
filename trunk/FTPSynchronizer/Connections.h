@@ -16,8 +16,6 @@ enum eProperty {DeleteObsoleteFiles,
 					 IncludeSubdirectories,
 					 Name,
 					 Source,
-					 SourcePassword,
-					 SourceUsername,
 					 SynchronizationType,
 					 Type};
 
@@ -35,8 +33,6 @@ class cConnections
 										  // Connection
 										  const QString qsName,
 										  const QString qsSource,
-										  const QString qsSourceUsername,
-										  const QString qsSourcePassword,
 										  const QString qsDestination,
 										  const QString qsDestinationUsername,
 										  const QString qsDestinationPassword,

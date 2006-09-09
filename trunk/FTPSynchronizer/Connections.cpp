@@ -59,34 +59,19 @@ cConnections::cConnections()
 QString cConnections::GetProperty(const QDomNode qdnConnection,
 											 const eProperty epProperty)
 {
-	QString qsResult;
-
 	switch (epProperty) {
-		case DeleteObsoleteFiles:		qsResult = qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsDELETE_OBSOLETE_FILES).toElement().text();
-												break;
-		case Destination:					qsResult = qdnConnection.namedItem(qsDESTINATION).namedItem(qsPATH).toElement().text();
-												break;
-		case DestinationPassword:		qsResult = qdnConnection.namedItem(qsDESTINATION).namedItem(qsPASSWORD).toElement().text();
-												break;
-		case DestinationUsername:		qsResult = qdnConnection.namedItem(qsDESTINATION).namedItem(qsUSERNAME).toElement().text();
-												break;
-		case IncludeSubdirectories:	qsResult = qdnConnection.namedItem(qsSETTINGS).namedItem(qsINCLUDE_SUBDIRECTORIES).toElement().text();
-												break;
-		case Name:							qsResult = qdnConnection.namedItem(qsNAME).toElement().text();
-												break;
-		case Source:						qsResult = qdnConnection.namedItem(qsSOURCE).namedItem(qsPATH).toElement().text();
-												break;
-		case SourcePassword:				qsResult = qdnConnection.namedItem(qsSOURCE).namedItem(qsPASSWORD).toElement().text();
-												break;
-		case SourceUsername:				qsResult = qdnConnection.namedItem(qsSOURCE).namedItem(qsUSERNAME).toElement().text();
-												break;
-		case SynchronizationType:		qsResult = qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsTYPE).toElement().text();
-												break;
-		case Type:							qsResult = qdnConnection.toElement().attributeNode(qsTYPE).value();
-												break;
+		case DeleteObsoleteFiles:		return qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsDELETE_OBSOLETE_FILES).toElement().text();
+		case Destination:					return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPATH).toElement().text();
+		case DestinationPassword:		return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPASSWORD).toElement().text();
+		case DestinationUsername:		return qdnConnection.namedItem(qsDESTINATION).namedItem(qsUSERNAME).toElement().text();
+		case IncludeSubdirectories:	return qdnConnection.namedItem(qsSETTINGS).namedItem(qsINCLUDE_SUBDIRECTORIES).toElement().text();
+		case Name:							return qdnConnection.namedItem(qsNAME).toElement().text();
+		case Source:						return qdnConnection.namedItem(qsSOURCE).namedItem(qsPATH).toElement().text();
+		case SynchronizationType:		return qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsTYPE).toElement().text();
+		case Type:							return qdnConnection.toElement().attributeNode(qsTYPE).value();
 	}; // switch
 
-	return qsResult;
+	return NULL;
 } // GetProperty
 
 // adds or edits connection
@@ -95,8 +80,6 @@ QDomNode cConnections::ModifyConnection(const eModify emModify,
 													 // Connection
 													 const QString qsName,
 													 const QString qsSource,
-													 const QString qsSourceUsername,
-													 const QString qsSourcePassword,
 													 const QString qsDestination,
 													 const QString qsDestinationUsername,
 													 const QString qsDestinationPassword,
@@ -121,12 +104,6 @@ QDomNode cConnections::ModifyConnection(const eModify emModify,
 	qdeProperty = qddXML.createElement(qsPATH);
 	qdeSubProperty.appendChild(qdeProperty);
 	cXMLTools::SetText(qddXML, &qdeProperty, qsSource);
-	qdeProperty = qddXML.createElement(qsUSERNAME);
-	qdeSubProperty.appendChild(qdeProperty);
-	cXMLTools::SetText(qddXML, &qdeProperty, qsSourceUsername);
-	qdeProperty = qddXML.createElement(qsPASSWORD);
-	qdeSubProperty.appendChild(qdeProperty);
-	cXMLTools::SetText(qddXML, &qdeProperty, qsSourcePassword);
 	qdeSubProperty = qddXML.createElement(qsDESTINATION);
 	qdnNewConnection.appendChild(qdeSubProperty);
 	qdeProperty = qddXML.createElement(qsPATH);
