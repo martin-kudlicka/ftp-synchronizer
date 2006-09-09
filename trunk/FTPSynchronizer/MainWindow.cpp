@@ -82,7 +82,7 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 	} // if else
 
 	if (emModify == Add) {
-		// add to TreeWidget
+		// add to QTreeWidget
 		if (!qtwiSelected) {
 			qtwiNewItem = new QTreeWidgetItem(qtwConnections);
 		} else {
@@ -105,7 +105,7 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 		// to hash table
 		qhTable.insert(qtwiNewItem, qdnNewItem);
 	} else {
-		// modify TreeWidget
+		// modify QTreeWidget
 		if (ccdNewConnection) {
 			qtwiSelected->setText(0, ccdNewConnection->qleName->text());
 		} else {
@@ -118,6 +118,19 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 		ShowInfo(qtwiSelected);
 	} // if else
 } // ConnectionOrFolderDialogAccepted
+
+// returns true if tree item is folder
+bool cMainWindow::IsFolder(QTreeWidgetItem *qtwiItem)
+{
+	QDomNode qdnNode;
+
+	qdnNode = qhTable.value(qtwiItem);
+	if (ccConnections.GetProperty(qdnNode, Type) == qsFOLDER) {
+		return true;
+	} else {
+		return false;
+	} // if else
+} // IsFolder
 
 // add new connection
 void cMainWindow::on_qaAddConnection_triggered()
@@ -144,46 +157,63 @@ void cMainWindow::on_qaAddFolder_triggered()
 // edit existing connection
 void cMainWindow::on_qaEdit_triggered()
 {
-	cConnectionDialog *ccdNewConnection;
-	QDomNode qdnConnection;
-	QString qsProperty;
+	if (IsFolder(qtwConnections->currentItem())) {
+		// folder
+		cFolderDialog *cfdNewFolder;
+		QDomNode qdnFolder;
 
-	qdnConnection = qhTable.value(qtwConnections->currentItem());
-	ccdNewConnection = new cConnectionDialog();
+		qdnFolder = qhTable.value(qtwConnections->currentItem());
+		cfdNewFolder = new cFolderDialog();
 
-	// fill values
-	// Connection
-	ccdNewConnection->qleName->setText(ccConnections.GetProperty(qdnConnection, Name));
-	ccdNewConnection->qleSource->setText(ccConnections.GetProperty(qdnConnection, Source));
-	ccdNewConnection->qleSourceUsername->setText(ccConnections.GetProperty(qdnConnection, SourceUsername));
-	ccdNewConnection->qleSourcePassword->setText(ccConnections.GetProperty(qdnConnection, SourcePassword));
-	ccdNewConnection->qleDestination->setText(ccConnections.GetProperty(qdnConnection, Destination));
-	ccdNewConnection->qleDestinationUsername->setText(ccConnections.GetProperty(qdnConnection, DestinationUsername));
-	ccdNewConnection->qleDestinationPassword->setText(ccConnections.GetProperty(qdnConnection, DestinationPassword));
-	// Settings
-	qsProperty = ccConnections.GetProperty(qdnConnection, IncludeSubdirectories);
-	if (qsProperty == qsTRUE) {
-		ccdNewConnection->cbIncludeSubdirectories->setChecked(true);
-	} else {
-		ccdNewConnection->cbIncludeSubdirectories->setChecked(false);
-	} // if else
-	// Synchronization
-	qsProperty = ccConnections.GetProperty(qdnConnection, SynchronizationType);
-	if (qsProperty == qsUPLOAD) {
-		ccdNewConnection->rbUpload->setChecked(true);
-	} else {
-		ccdNewConnection->rbDownload->setChecked(true);
-	} // if else
-	qsProperty = ccConnections.GetProperty(qdnConnection, DeleteObsoleteFiles);
-	if (qsProperty == qsTRUE) {
-		ccdNewConnection->cbDeleteObsoleteFiles->setChecked(true);
-	} else {
-		ccdNewConnection->cbDeleteObsoleteFiles->setChecked(false);
-	} // if else
+		// fill values
+		cfdNewFolder->qleName->setText(ccConnections.GetProperty(qdnFolder, Name));
 
-	if (ccdNewConnection->exec() == QDialog::Accepted) {
-		ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Modify);
-	} // if
+		if (cfdNewFolder->exec() == QDialog::Accepted) {
+			ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, Modify);
+		} // if
+	} else {
+		// connection
+		cConnectionDialog *ccdNewConnection;
+		QDomNode qdnConnection;
+		QString qsProperty;
+
+		qdnConnection = qhTable.value(qtwConnections->currentItem());
+		ccdNewConnection = new cConnectionDialog();
+
+		// fill values
+		// Connection
+		ccdNewConnection->qleName->setText(ccConnections.GetProperty(qdnConnection, Name));
+		ccdNewConnection->qleSource->setText(ccConnections.GetProperty(qdnConnection, Source));
+		ccdNewConnection->qleSourceUsername->setText(ccConnections.GetProperty(qdnConnection, SourceUsername));
+		ccdNewConnection->qleSourcePassword->setText(ccConnections.GetProperty(qdnConnection, SourcePassword));
+		ccdNewConnection->qleDestination->setText(ccConnections.GetProperty(qdnConnection, Destination));
+		ccdNewConnection->qleDestinationUsername->setText(ccConnections.GetProperty(qdnConnection, DestinationUsername));
+		ccdNewConnection->qleDestinationPassword->setText(ccConnections.GetProperty(qdnConnection, DestinationPassword));
+		// Settings
+		qsProperty = ccConnections.GetProperty(qdnConnection, IncludeSubdirectories);
+		if (qsProperty == qsTRUE) {
+			ccdNewConnection->cbIncludeSubdirectories->setChecked(true);
+		} else {
+			ccdNewConnection->cbIncludeSubdirectories->setChecked(false);
+		} // if else
+		// Synchronization
+		qsProperty = ccConnections.GetProperty(qdnConnection, SynchronizationType);
+		if (qsProperty == qsUPLOAD) {
+			ccdNewConnection->rbUpload->setChecked(true);
+		} else {
+			ccdNewConnection->rbDownload->setChecked(true);
+		} // if else
+		qsProperty = ccConnections.GetProperty(qdnConnection, DeleteObsoleteFiles);
+		if (qsProperty == qsTRUE) {
+			ccdNewConnection->cbDeleteObsoleteFiles->setChecked(true);
+		} else {
+			ccdNewConnection->cbDeleteObsoleteFiles->setChecked(false);
+		} // if else
+
+		if (ccdNewConnection->exec() == QDialog::Accepted) {
+			ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, Modify);
+		} // if
+	} // if else
 } // on_qaEdit_triggered
 
 // remove folder or connection
@@ -208,6 +238,12 @@ void cMainWindow::on_qtwConnections_currentItemChanged(QTreeWidgetItem *current,
 		// main menu
 		qaEdit->setEnabled(true);
 		qaRemove->setEnabled(true);
+		// toolbar
+		if (IsFolder(current)) {
+			qaStart->setEnabled(false);
+		} else {
+			qaStart->setEnabled(true);
+		} // if else
 		// show info about selected item
 		ShowInfo(current);
 	} else {
@@ -217,6 +253,8 @@ void cMainWindow::on_qtwConnections_currentItemChanged(QTreeWidgetItem *current,
 		// main menu
 		qaEdit->setEnabled(false);
 		qaRemove->setEnabled(false);
+		// toolbar
+		qaStart->setEnabled(false);
 		// clear info
 		ShowInfo(NULL);
 	} // if else
@@ -251,7 +289,7 @@ void cMainWindow::ShowConnectionTree()
 		qhTable.insert(qtwiItem, qdnConnection);
 
 		// go to the next one
-		if (ccConnections.GetProperty(qdnConnection, Type) == qsFOLDER) {
+		if (ccConnections.GetProperty(qdnConnection, Type) == qsFOLDER && !qdnConnection.namedItem(qsCONNECTION).isNull()) {
 			qsXMLLevel.push(qdnConnection);
 			qsTreeLevel.push(qtwiItem);
 			qdnConnection = qdnConnection.namedItem(qsCONNECTION);

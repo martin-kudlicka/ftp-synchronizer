@@ -24,6 +24,7 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 		void ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdNewConnection,
 														  const cFolderDialog *cfdNewFolder,
 														  const eModify emModify);
+		bool IsFolder(QTreeWidgetItem *qtwiItem);
 		void ShowConnectionTree();
 		void ShowInfo(QTreeWidgetItem *qtwiSelected);
 

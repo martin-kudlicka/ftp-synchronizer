@@ -33,7 +33,12 @@ void cConnections::ApplyChanges(const eModify emModify, QDomNode qdnParent, cons
 			} // if else
 		} // if else
 	} else {
-		qdnParent.parentNode().replaceChild(qdnNewItem, qdnParent);
+		if (GetProperty(qdnParent, Type) == qsFOLDER) {
+			// folder can't be replaced due to lost of his childrens
+			cXMLTools::SetText(qddXML, &qdnParent.namedItem(qsNAME).toElement(), qdnNewItem.namedItem(qsNAME).toElement().text());
+		} else {
+			qdnParent.parentNode().replaceChild(qdnNewItem, qdnParent);
+		} // if else
 	} // if else
 
 	Save();

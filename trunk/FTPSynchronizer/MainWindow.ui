@@ -137,16 +137,25 @@
    <addaction name="qaStop" />
   </widget>
   <action name="qaStart" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>Start</string>
    </property>
   </action>
   <action name="qaPause" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>Pause</string>
    </property>
   </action>
   <action name="qaStop" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
    <property name="text" >
     <string>Stop</string>
    </property>
