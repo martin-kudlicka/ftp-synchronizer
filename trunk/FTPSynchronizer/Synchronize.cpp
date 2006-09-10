@@ -245,9 +245,8 @@ void cSynchronize::Initialization()
 void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 {
 	// Close
-	if (qfDestination.currentCommand() == QFtp::Close) {
-		emit Done();
-		Deinitialization();
+	if (qfDestination.currentCommand() == QFtp::Close && !bStop) {
+		SynchronizationEnd(tr("OK"));
 		return;
 	} // if
 
@@ -342,8 +341,9 @@ void cSynchronize::on_qfDestination_done(bool error)
 	if (error) {
 		// finish on error
 		emit SendMessage(tr("Error: %1").arg(qfDestination.errorString()));
-		emit Done();
-		Deinitialization();
+		SynchronizationEnd(qfDestination.errorString());
+		bStop = true;
+		DisconnectDestination();
 		return;
 	} // if
 } // on_qfDestination_done
@@ -376,12 +376,10 @@ void cSynchronize::on_qfDestination_stateChanged(int state)
 // stop synchronization by external signal
 void cSynchronize::on_StopSynchronization()
 {
-	// TODO check on real server
 	bStop = true;
 	qfDestination.abort();
 	DisconnectDestination();
-	emit Done();
-	Deinitialization();
+	SynchronizationEnd(tr("Stopped"));
 } // on_StopSynchronization
 
 // get next directory from queue and optionally set right directory string with FTP level
@@ -418,6 +416,14 @@ void cSynchronize::Start()
 
 	Synchronize();
 } // Start
+
+// end of synchronization process
+void cSynchronize::SynchronizationEnd(QString qsMessage)
+{
+	ccConnections->SetLastRun(qdnConnection, QDateTime::currentDateTime(), qsMessage);
+	emit Done();
+	Deinitialization();
+} // SynchronizationEnd
 
 // get file and folder lists
 void cSynchronize::Synchronize()

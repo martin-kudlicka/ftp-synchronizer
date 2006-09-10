@@ -3,6 +3,7 @@
 
 #include <QDomDocument>
 #include <QFile>
+#include <QDateTime>
 
 const QString qsCONNECTION = "Connection";
 const QString qsFOLDER = "Folder";
@@ -47,6 +48,7 @@ class cConnections
 									 // properties
 									 const QString qsName);
 		void Remove(const QDomNode qdnConnection);
+		void SetLastRun(QDomNode qdnConnection, QDateTime qdtDateTime, QString qsMessage);
 
 	private:
 		QFile qfFile;

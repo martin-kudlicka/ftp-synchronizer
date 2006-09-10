@@ -2,12 +2,20 @@
 
 #include "../../Common/XMLTools.h"
 #include <QStack>
+#include <QSettings>
+#include <QFileInfo>
+#include <QDir>
 
+const QString qsAPPLICATION_NAME = "FTPSynchronizer";
+const QString qsCOMPANY = "Isshou";
 const QString qsCONNECTIONS_FILE = "Connections.xml";
+const QString qsDATE_TIME = "DateTime";
 const QString qsDELETE_OBSOLETE_FILES = "DeleteObsoleteFiles";
 const QString qsDESTINATION = "Destination";
 const QString qsINCLUDE_SUBDIRECTORIES = "IncludeSubdirectories";
 const QString qsFALSE = "False";
+const QString qsLAST_RUN = "LastRun";
+const QString qsMESSAGE = "Message";
 const QString qsNAME = "Name";
 const QString qsPASSWORD = "Password";
 const QString qsPATH = "Path";
@@ -48,11 +56,22 @@ void cConnections::ApplyChanges(const eModify emModify, QDomNode qdnParent, cons
 // load XML file with connections
 cConnections::cConnections()
 {
-	qfFile.setFileName(qsCONNECTIONS_FILE);
+	QDir qdDir;
+	QFileInfo qfiFile;
+	QSettings qsSettings(QSettings::IniFormat, QSettings::UserScope, qsCOMPANY);
+
+	// get application data file path and create it
+	qfiFile.setFile(qsSettings.fileName());
+	qdDir.mkdir(qfiFile.absolutePath() + "/" + qsCOMPANY);
+	qdDir.mkdir(qfiFile.absolutePath() + "/" + qsCOMPANY + "/" + qsAPPLICATION_NAME);
+
+	// open data file
+	qfFile.setFileName(qfiFile.absolutePath() + "/" + qsCOMPANY + "/" + qsAPPLICATION_NAME + "/" + qsCONNECTIONS_FILE);
 	qfFile.open(QIODevice::ReadWrite);
 	if (!qddXML.setContent(&qfFile)) {
 		// create XML structure
-		qddXML.setContent((QString)"<Connections></Connections>");
+		qddXML.setContent((QString)"<?xml version=\"1.0\" standalone=\"yes\" ?><Connections></Connections>");
+		Save();
 	} // if
 } // cConnections
 
@@ -163,6 +182,11 @@ QDomNode cConnections::ModifyConnection(const eModify emModify,
 	qdeSubProperty.appendChild(qdeProperty);
 	cXMLTools::SetText(qddXML, &qdeProperty, bDeleteObsoleteFiles ? qsTRUE : qsFALSE);
 
+	// copy some information when modyfying
+	if (emModify == Modify) {
+		qdnNewConnection.appendChild(qdnParent.namedItem(qsLAST_RUN).cloneNode());
+	} // if
+
 	ApplyChanges(emModify, qdnParent, qdnNewConnection);
 
 	return qdnNewConnection;
@@ -203,3 +227,31 @@ void cConnections::Save()
 	qfFile.resize(0);
 	qfFile.write(qddXML.toByteArray());
 } // Save
+
+// set last run in connection
+void cConnections::SetLastRun(QDomNode qdnConnection, QDateTime qdtDateTime, QString qsMessage)
+{
+	QDomNode qdnDateTime, qdnLastRun, qdnMessage;
+
+	qdnLastRun = qdnConnection.namedItem(qsLAST_RUN);
+	if (qdnLastRun.isNull()) {
+		qdnLastRun = qddXML.createElement(qsLAST_RUN);
+		qdnConnection.appendChild(qdnLastRun);
+	} // if
+
+	qdnDateTime = qdnLastRun.namedItem(qsDATE_TIME);
+	if (qdnDateTime.isNull()) {
+		qdnDateTime = qddXML.createElement(qsDATE_TIME);
+		qdnLastRun.appendChild(qdnDateTime);
+	} // if
+	cXMLTools::SetText(qddXML, &qdnDateTime.toElement(), qdtDateTime.toString());
+
+	qdnMessage = qdnLastRun.namedItem(qsMESSAGE);
+	if (qdnMessage.isNull()) {
+		qdnMessage = qddXML.createElement(qsMESSAGE);
+		qdnLastRun.appendChild(qdnMessage);
+	} // if
+	cXMLTools::SetText(qddXML, &qdnMessage.toElement(), qsMessage);
+
+	Save();
+} // SetLastRun

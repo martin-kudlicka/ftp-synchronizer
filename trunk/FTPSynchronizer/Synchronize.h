@@ -47,6 +47,7 @@ class cSynchronize : private QObject
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);
+		void SynchronizationEnd(QString qsMessage);
 		void Synchronize();
 		void Synchronize2();
 
