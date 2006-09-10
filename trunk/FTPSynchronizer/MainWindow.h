@@ -37,14 +37,15 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 
 	private slots:
 		void on_cSynchronize_Done();
+		void on_cSynchronize_FTPStateChanged(int iState);
 		void on_cSynchronize_Message(const QString qsMessage);
+		void on_cSynchronize_Progress(qint64 qi64Done, qint64 qi64Total);
 		void on_qaAddConnection_triggered();
 		void on_qaAddFolder_triggered();
 		void on_qaEdit_triggered();
 		void on_qaRemove_triggered();
 		void on_qaStart_triggered();
 		void on_qaStop_triggered();
-		void on_qfDestination_stateChanged(int state);
 		void on_qtwConnections_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 		void on_qtwConnections_customContextMenuRequested(const QPoint &pos);
 }; // cMainWindow

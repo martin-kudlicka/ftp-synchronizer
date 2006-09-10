@@ -5,28 +5,8 @@ void cSynchronize::ConnectDestination()
 {
 	qfDestination.connectToHost(quDestination.host());
 	qfDestination.login(ccConnections->GetProperty(qdnConnection, cConnections::DestinationUsername),
-								ccConnections->GetProperty(qdnConnection, cConnections::DestinationPassword));
+							  ccConnections->GetProperty(qdnConnection, cConnections::DestinationPassword));
 } // ConnectDestination
-
-// connect signals for GUI
-void cSynchronize::ConnectSignals()
-{
-	QObject::connect(&qfDestination, SIGNAL(listInfo(const QUrlInfo &)),
-						  SLOT(on_qfDestination_listInfo(const QUrlInfo &)));
-	QObject::connect(&qfDestination, SIGNAL(done(bool)), SLOT(on_qfDestination_done(bool)));
-	QObject::connect(&qfDestination, SIGNAL(commandFinished(int, bool)), SLOT(on_qfDestination_commandFinished(int, bool)));
-	QObject::connect(&qfDestination, SIGNAL(commandStarted(int)), SLOT(on_qfDestination_commandStarted(int)));
-
-	// GUI only signals
-	if (bGUIRunning) {
-		QObject::connect(&qfDestination, SIGNAL(stateChanged(int)),
-							  qmwGUI, SLOT(on_qfDestination_stateChanged(int)));
-		QObject::connect(this, SIGNAL(SendGUIMessage(const QString)),
-							  qmwGUI, SLOT(on_cSynchronize_Message(const QString)));
-		QObject::connect(qmwGUI, SIGNAL(StopSynchronization()), this, SLOT(on_qmwGUI_StopSynchronization()));
-		QObject::connect(this, SIGNAL(Done()), qmwGUI, SLOT(on_cSynchronize_Done()));
-	} // if
-} // ConnectSignals
 
 // copy files to destination
 void cSynchronize::CopyFiles(const eDirection edDirection)
@@ -77,7 +57,7 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
 				QDir qdDir;
 
-				emit SendGUIMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
+				emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
 				qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
 			} // if
 		} // for
@@ -87,17 +67,32 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 
 		for (iI = 0; iI < qqSourceDirectories.count() && !bStop; iI++) {
 			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
-				emit SendGUIMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
+				emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
 				qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI));
 			} // if
 		} // for
 	} // if else
 } // CreateDirectories
 
+// constructor
+cSynchronize::cSynchronize()
+{
+	connect(&qfDestination, SIGNAL(listInfo(const QUrlInfo &)),
+			  SLOT(on_qfDestination_listInfo(const QUrlInfo &)));
+	connect(&qfDestination, SIGNAL(done(bool)), SLOT(on_qfDestination_done(bool)));
+	connect(&qfDestination, SIGNAL(commandFinished(int, bool)),
+			  SLOT(on_qfDestination_commandFinished(int, bool)));
+	connect(&qfDestination, SIGNAL(commandStarted(int)),
+			  SLOT(on_qfDestination_commandStarted(int)));
+	connect(&qfDestination, SIGNAL(stateChanged(int)),
+			  SLOT(on_qfDestination_stateChanged(int)));
+	connect(&qfDestination, SIGNAL(dataTransferProgress(qint64, qint64)),
+			  SLOT(on_qfDestination_dataTransferProgress(qint64, qint64)));
+} // cSynchronize
+
 // deinitialization class
 void cSynchronize::Deinitialization()
 {
-	DisconnectSignals();
 	if (!bGUIRunning) {
 		delete ccConnections;
 	} // if
@@ -116,7 +111,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 				QFile qfFile;
 
 				qfFile.setFileName(quSource.path() + "/" + qqSourceFiles.at(iI));
-				emit SendGUIMessage(tr("Removing: %1").arg(qqSourceFiles.at(iI)));
+				emit SendMessage(tr("Removing: %1").arg(qqSourceFiles.at(iI)));
 				qfFile.remove();
 			} // if
 		} // for
@@ -126,7 +121,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
 				QDir qdDir;
 
-				emit SendGUIMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)));
+				emit SendMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)));
 				qdDir.rmdir(quSource.path() + "/" + qqSourceDirectories.at(iI));
 			} // if
 		} // for
@@ -137,7 +132,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 		// files
 		for (iI = 0; iI < qqDestinationFiles.count() && !bStop; iI++) {
 			if (qqSourceFiles.indexOf(qqDestinationFiles.at(iI)) == -1) {
-				emit SendGUIMessage(tr("Removing: %1").arg(qqDestinationFiles.at(iI)));
+				emit SendMessage(tr("Removing: %1").arg(qqDestinationFiles.at(iI)));
 				qfDestination.remove(quDestination.path() + "/" + qqDestinationFiles.at(iI));
 			} // if
 		} // for
@@ -145,7 +140,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 		// directories
 		for (iI = qqDestinationDirectories.count() - 1 && !bStop; iI >= 0; iI--) {
 			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
-				emit SendGUIMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)));
+				emit SendMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)));
 				qfDestination.rmdir(quDestination.path() + "/" + qqDestinationDirectories.at(iI));
 			} // if
 		} // for
@@ -157,19 +152,6 @@ void cSynchronize::DisconnectDestination()
 {
 	qfDestination.close();
 } // DisconnectDestination
-
-// break signals connection
-void cSynchronize::DisconnectSignals()
-{
-	qfDestination.disconnect();
-
-	// GUI only signals
-	if (bGUIRunning) {
-		disconnect();
-		qmwGUI->disconnect(SIGNAL(SendGUIMessage(const QString)));
-		qmwGUI->disconnect(SIGNAL(StopSynchronization()));
-	} // if
-} // DisconnectSignals
 
 // fills files and directories info
 void cSynchronize::GetFileList(const eDirection edDirection)
@@ -197,7 +179,7 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 			// add files to global
 			for (iI = 0; iI < qslCurrentList.count(); iI++) {
 				qqSourceFiles += qsCurrentDirectory + qslCurrentList.at(iI);
-				emit SendGUIMessage(tr("Source: %1").arg(qslCurrentList.at(iI)));
+				emit SendMessage(tr("Source: %1").arg(qslCurrentList.at(iI)));
 			} // for
 
 			// list current directory for directories
@@ -208,7 +190,7 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 				for (iI = 0; iI < qslCurrentList.count(); iI++) {
 					qqSourceDirectories += qsCurrentDirectory + qslCurrentList.at(iI);
 					qqCurrentDirectories.enqueue(qslCurrentList.at(iI));
-					emit SendGUIMessage(tr("Source: [%1]").arg(qslCurrentList.at(iI)));
+					emit SendMessage(tr("Source: [%1]").arg(qslCurrentList.at(iI)));
 				} // for
 				qsDirectoryLevel.push(qqCurrentDirectories);
 			} else {
@@ -257,7 +239,6 @@ void cSynchronize::Initialization()
 	qsCurrentDirectory.clear();
 	qsDirectoryLevel.clear();
 	bStop = false;
-	ConnectSignals();
 } // Initialization
 
 // single FTP command finished
@@ -324,7 +305,7 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 		if (!qsDirectoryLevel.empty() && bIncludeSubdirectories && !bStop) {
 			// next round...
 #ifdef _DEBUG
-		emit SendGUIMessage(tr("Change: %1").arg(qsDirectory));
+		emit SendMessage(tr("Change: %1").arg(qsDirectory));
 #endif
 			qfDestination.cd(qsDirectory);
 			qfDestination.list();
@@ -332,8 +313,6 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 			// continue in synchronization
 			Synchronize2();
 		} // if else
-
-		return;
 	} // if
 } // on_qfDestination_commandFinished
 
@@ -345,20 +324,28 @@ void cSynchronize::on_qfDestination_commandStarted(int id)
 		sCommand scCommand;
 
 		scCommand = qhCommands.value(id);
-		emit SendGUIMessage(scCommand.qsMessage);
+		emit SendMessage(scCommand.qsMessage);
 
 		return;
 	} // if
 } // on_qfDestination_commandStarted
 
+// synchronization progress signal
+void cSynchronize::on_qfDestination_dataTransferProgress(qint64 done, qint64 total)
+{
+	emit Progress(done, total);
+} // on_qfDestination_dataTransferProgress
+
 // pending operations on FTP done
 void cSynchronize::on_qfDestination_done(bool error)
 {
-#ifdef _DEBUG
 	if (error) {
-		emit SendGUIMessage(tr("Error: %1").arg(qfDestination.errorString()));
+		// finish on error
+		emit SendMessage(tr("Error: %1").arg(qfDestination.errorString()));
+		emit Done();
+		Deinitialization();
+		return;
 	} // if
-#endif
 } // on_qfDestination_done
 
 // searching for files and directories
@@ -376,15 +363,26 @@ void cSynchronize::on_qfDestination_listInfo(const QUrlInfo &i)
 			qsMessage += i.name();
 			qqCurrentDestinationFiles.enqueue(i.name());
 		} // if else
-		emit SendGUIMessage(qsMessage);
+		emit SendMessage(qsMessage);
 	} // if
 } // on_qfDestination_listInfo
 
-// stop synchronization by GUI control
-void cSynchronize::on_qmwGUI_StopSynchronization()
+// FTP state change
+void cSynchronize::on_qfDestination_stateChanged(int state)
 {
+	emit FTPStateChanged(state);
+} // on_qfDestination_stateChanged
+
+// stop synchronization by external signal
+void cSynchronize::on_StopSynchronization()
+{
+	// TODO check on real server
 	bStop = true;
-} // on_qmwGUI_StopSynchronization
+	qfDestination.abort();
+	DisconnectDestination();
+	emit Done();
+	Deinitialization();
+} // on_StopSynchronization
 
 // get next directory from queue and optionally set right directory string with FTP level
 QString cSynchronize::SetDirectory(const eDirection edDirection, QDir *qdDir /* NULL */)
@@ -425,7 +423,7 @@ void cSynchronize::Start()
 void cSynchronize::Synchronize()
 {
 	// get source and destination file list
-	emit SendGUIMessage(tr("Searching for files and folders..."));
+	emit SendMessage(tr("Searching for files and folders..."));
 	// TODO infinite progress bar
 	GetFileList(Source);
 	GetFileList(Destination);

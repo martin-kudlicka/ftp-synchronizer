@@ -3,7 +3,6 @@
 
 #include <QString>
 #include "Connections.h"
-#include <QMainWindow>
 #include <QFtp>
 #include <QUrl>
 #include <QDir>
@@ -20,9 +19,10 @@ class cSynchronize : private QObject
 	public:
 		cConnections *ccConnections;
 		QDomNode qdnConnection;
-		QMainWindow *qmwGUI;
 		QString qsName;
 		QUrl quSource, quDestination;
+
+		cSynchronize();
 
 		void Start();
 
@@ -39,13 +39,11 @@ class cSynchronize : private QObject
 							 qqDestinationFiles, qqSourceDirectories, qqSourceFiles;
 
 		void ConnectDestination();
-		void ConnectSignals();
 		void CopyFiles(const eDirection edDirection);
 		void CreateDirectories(const eDirection edDirection);
 		void Deinitialization();
 		void DeleteObsolete(const eDirection edDirection);
 		void DisconnectDestination();
-		void DisconnectSignals();
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);
@@ -53,15 +51,19 @@ class cSynchronize : private QObject
 		void Synchronize2();
 
 	signals:
-		void SendGUIMessage(const QString qsMessage);
+		void FTPStateChanged(int iState);
+		void Progress(qint64 qi64Done, qint64 qi64Total);
+		void SendMessage(const QString qsMessage);
 		void Done();
 
 	private slots:
 		void on_qfDestination_commandFinished(int id, bool error);
 		void on_qfDestination_commandStarted(int id);
+		void on_qfDestination_dataTransferProgress(qint64 done, qint64 total);
 		void on_qfDestination_done(bool error);
 		void on_qfDestination_listInfo(const QUrlInfo &i);
-		void on_qmwGUI_StopSynchronization();
+		void on_qfDestination_stateChanged(int state);
+		void on_StopSynchronization();
 }; // cSynchronize
 
 #endif

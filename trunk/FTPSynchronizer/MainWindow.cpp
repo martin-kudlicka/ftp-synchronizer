@@ -32,6 +32,17 @@ cMainWindow::cMainWindow()
 	qtwiHeader->setText(0, tr("Connections"));
 	qtwConnections->setHeaderItem(qtwiHeader);
 	ShowConnectionTree();
+
+	// connect signals
+	connect((QObject *)&csSynchronize, SIGNAL(SendMessage(const QString)),
+			  this, SLOT(on_cSynchronize_Message(const QString)));
+	connect(this, SIGNAL(StopSynchronization()),
+			  (QObject *)&csSynchronize, SLOT(on_StopSynchronization()));
+	connect((QObject *)&csSynchronize, SIGNAL(Done()), this, SLOT(on_cSynchronize_Done()));
+	connect((QObject *)&csSynchronize, SIGNAL(FTPStateChanged(int)),
+			  this, SLOT(on_cSynchronize_FTPStateChanged(int)));
+	connect((QObject *)&csSynchronize, SIGNAL(Progress(qint64, qint64)),
+			  this, SLOT(on_cSynchronize_Progress(qint64, qint64)));
 } // cMainWindow
 
 // connection dialog accepted - make changes
@@ -135,7 +146,32 @@ void cMainWindow::on_cSynchronize_Done()
 	// enable controls
 	qaStart->setEnabled(true);
 	qaStop->setEnabled(false);
+
+	qpbProgress->setValue(0);
 } // on_cSynchronize_Done
+
+// destination FTP state change
+void cMainWindow::on_cSynchronize_FTPStateChanged(int iState)
+{
+	QString qsStatus;
+
+	switch (iState) {
+		case QFtp::Unconnected:	qsStatus = tr("There is no connection to the host.");
+										break;
+		case QFtp::HostLookup:	qsStatus = tr("A host name lookup is in progress.");
+										break;
+		case QFtp::Connecting:	qsStatus = tr("An attempt to connect to the host is in progress.");
+										break;
+		case QFtp::Connected:	qsStatus = tr("Connection to the host has been achieved.");
+										break;
+		case QFtp::LoggedIn:		qsStatus = tr("Connection and user login have been achieved.");
+										break;
+		case QFtp::Closing:		qsStatus = tr("The connection is closing down, but it is not yet closed.");
+										break;
+	} // switch
+
+	this->statusBar()->showMessage(qsStatus);
+} // on_cSynchronize_FTPStateChanged
 
 // message from Synchronize class
 void cMainWindow::on_cSynchronize_Message(const QString qsMessage)
@@ -143,6 +179,13 @@ void cMainWindow::on_cSynchronize_Message(const QString qsMessage)
 	qteLog->insertPlainText(QString("%1\n").arg(qsMessage));
 	qteLog->verticalScrollBar()->setValue(qteLog->verticalScrollBar()->maximum());
 } // on_cSynchronize_Message
+
+// synchronization progress slot
+void cMainWindow::on_cSynchronize_Progress(qint64 qi64Done, qint64 qi64Total)
+{
+	qpbProgress->setMaximum(qi64Total);
+	qpbProgress->setValue(qi64Done);
+} // on_cSynchronize_Progress
 
 // add new connection
 void cMainWindow::on_qaAddConnection_triggered()
@@ -255,7 +298,6 @@ void cMainWindow::on_qaStart_triggered()
 
 	csSynchronize.qsName = qtwConnections->currentItem()->text(0);
 	csSynchronize.ccConnections = &ccConnections;
-	csSynchronize.qmwGUI = this;
 	csSynchronize.Start();
 } // on_qsStart_triggered
 
@@ -264,29 +306,6 @@ void cMainWindow::on_qaStop_triggered()
 {
 	emit StopSynchronization();
 } // on_qaStop_triggered
-
-// destination FTP state change
-void cMainWindow::on_qfDestination_stateChanged(int state)
-{
-	QString qsStatus;
-
-	switch (state) {
-		case QFtp::Unconnected:	qsStatus = tr("There is no connection to the host.");
-										break;
-		case QFtp::HostLookup:	qsStatus = tr("A host name lookup is in progress.");
-										break;
-		case QFtp::Connecting:	qsStatus = tr("An attempt to connect to the host is in progress.");
-										break;
-		case QFtp::Connected:	qsStatus = tr("Connection to the host has been achieved.");
-										break;
-		case QFtp::LoggedIn:		qsStatus = tr("Connection and user login have been achieved.");
-										break;
-		case QFtp::Closing:		qsStatus = tr("The connection is closing down, but it is not yet closed.");
-										break;
-	} // switch
-
-	this->statusBar()->showMessage(qsStatus);
-} // on_qfDestination_stateChanged
 
 // another item selcted in tree view
 void cMainWindow::on_qtwConnections_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
