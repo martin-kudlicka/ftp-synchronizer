@@ -28,30 +28,23 @@ class cSynchronize : private QObject
 		void Start();
 
 	private:
-		struct sCommand {QString qsMessage;
-							  QFile *qfFile;
-		}; // sCommand
-		struct sFileInfo {QDateTime qdtLastModified;
-								QDomNode qdnXMLItem;
-		}; // sFileInfo
+		struct sCommand {QString qsMessage; QFile *qfFile;};
 
-		bool bBufferedDestination, bBufferedSource, bGUIRunning, bStop;
+		bool bBufferedDownload, bBufferedUpload, bGUIRunning, bStop;
+		QDomNode qdnDestinationBuffer, qdnSourceBuffer;
 		QFtp qfDestination;
 		QHash<int, sCommand> qhCommands;
-		QHash<QString, sFileInfo *> qhCurrentDestinationFiles, qhDestinationDirectories, qhDestinationFiles, qhSourceDirectories, qhSourceFiles;
+		QHash<QString, QDateTime> qhCurrentDestinationFiles, qhDestinationFiles, qhSourceFiles;
 		QStack<QQueue<QString> > qsDirectoryLevel;
 		QString qsCurrentDirectory;
-		QQueue<QString> qqCurrentDestinationDirectories;
+		QQueue<QString> qqCurrentDestinationDirectories, qqDestinationDirectories, qqSourceDirectories;
 
-		void BuildBuffer(const eDirection edDirection);
-		bool CanCopy(const QHashIterator<QString, sFileInfo *> qhiI, const eDirection edDirection);
 		void ConnectDestination();
 		void CopyFiles(const eDirection edDirection);
 		void CreateDirectories(const eDirection edDirection);
 		void Deinitialization();
 		void DeleteObsolete(const eDirection edDirection);
 		void DisconnectDestination();
-		void FillSourceLists(const eDirection edDirection);
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);

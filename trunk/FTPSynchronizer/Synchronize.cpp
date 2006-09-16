@@ -1,91 +1,5 @@
 #include "Synchronize.h"
 
-#include "Common/XMLTools.h"
-
-const QString qsDIRECTORY = "Directory";
-const QString qsFILE = "File";
-const QString qsITEM = "Item";
-const QString qsLAST_MODIFIED = "LastModified";
-
-// build XML buffer for edDirection
-void cSynchronize::BuildBuffer(const eDirection edDirection)
-{
-	QDomNode qdnBuffer;
-	QHash<QString, sFileInfo *> *qhDirectories, *qhFiles;
-	QHash<QString, sFileInfo *>::const_iterator qhDirectoriesIterator, qhFilesIterator;
-
-	qdnBuffer = ccConnections->GetBuffer(qdnConnection, edDirection);
-	if (edDirection == Source) {
-		qhFiles = &qhSourceFiles;
-		qhDirectories = &qhSourceDirectories;
-	} else {
-		qhFiles = &qhDestinationFiles;
-		qhDirectories = &qhDestinationDirectories;
-	} // if else
-	qhFilesIterator = qhFiles->constBegin();
-	qhDirectoriesIterator = qhDirectories->constBegin();
-
-	// directories
-	while (qhDirectoriesIterator != qhDirectories->constEnd()) {
-		QDomElement qdeItem, qdeName;
-
-		qdeItem = ccConnections->qddXML.createElement(qsITEM);
-		qdnBuffer.appendChild(qdeItem);
-		qdeItem.setAttribute(qsTYPE, qsDIRECTORY);
-		qdeName = ccConnections->qddXML.createElement(qsNAME);
-		qdeItem.appendChild(qdeName);
-		cXMLTools::SetText(ccConnections->qddXML, &qdeName, qhDirectoriesIterator.key());
-		qhDirectoriesIterator.value()->qdnXMLItem = qdeItem;
-
-		qhDirectoriesIterator++;
-	} // while
-
-	// files
-	while (qhFilesIterator != qhFiles->constEnd()) {
-		QDomElement qdeItem, qdeLastModified, qdeName;
-
-		qdeItem = ccConnections->qddXML.createElement(qsITEM);
-		qdnBuffer.appendChild(qdeItem);
-		qdeItem.setAttribute(qsTYPE, qsFILE);
-		qdeName = ccConnections->qddXML.createElement(qsNAME);
-		qdeItem.appendChild(qdeName);
-		cXMLTools::SetText(ccConnections->qddXML, &qdeName, qhFilesIterator.key());
-		qdeLastModified = ccConnections->qddXML.createElement(qsLAST_MODIFIED);
-		qdeItem.appendChild(qdeLastModified);
-		cXMLTools::SetText(ccConnections->qddXML, &qdeLastModified, qhFilesIterator.value()->qdtLastModified.toString());
-		qhFilesIterator.value()->qdnXMLItem = qdeItem;
-
-		qhFilesIterator++;
-	} // while
-} // BuildBuffer
-
-// return true if file can be copied in chosed direction
-bool cSynchronize::CanCopy(const QHashIterator<QString, sFileInfo *> qhiI, const eDirection edDirection)
-{
-	QHash<QString, sFileInfo *> *qhTargetFiles;
-	sFileInfo *sfiTarget;
-
-	if (edDirection == Source) {
-		qhTargetFiles = &qhSourceFiles;
-	} else {
-		qhTargetFiles = &qhDestinationFiles;
-	} // if else
-
-	if (!qhTargetFiles->contains(qhiI.key())) {
-		// file doesn't exists on target -> copy
-		return true;
-	} // if
-
-	sfiTarget = qhTargetFiles->value(qhiI.key());
-	
-	// compare last modified stamp
-	if (sfiTarget->qdtLastModified != qhiI.value()->qdtLastModified) {
-		return true;
-	} else {
-		return false;
-	} // if else
-} // CanCopy
-
 // connect to FTP
 void cSynchronize::ConnectDestination()
 {
@@ -99,7 +13,7 @@ void cSynchronize::CopyFiles(const eDirection edDirection)
 {
 	if (edDirection == Source) {
 		// copy to source
-		QHashIterator<QString, sFileInfo *> qhiI(qhDestinationFiles);
+		QHashIterator<QString, QDateTime> qhiI(qhDestinationFiles);
 
 		while (qhiI.hasNext() && !bStop) {
 			int iCommand;
@@ -107,19 +21,15 @@ void cSynchronize::CopyFiles(const eDirection edDirection)
 			sCommand scCommand;
 
 			qhiI.next();
-			if (!bBufferedDestination || CanCopy(qhiI, edDirection)) {
-				qfFile = new QFile(quSource.path() + "/" + qhiI.key());
-				scCommand.qfFile = qfFile;
-				scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
-				iCommand = qfDestination.get(quDestination.path() + "/" + qhiI.key(), qfFile);
-				qhCommands.insert(iCommand, scCommand);
-			} else {
-				emit SendMessage(tr("Skipping: %1").arg(qhiI.key()));
-			} // if else
+			qfFile = new QFile(quSource.path() + "/" + qhiI.key());
+			scCommand.qfFile = qfFile;
+			scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
+			iCommand = qfDestination.get(quDestination.path() + "/" + qhiI.key(), qfFile);
+			qhCommands.insert(iCommand, scCommand);
 		} // while
 	} else {
 		// copy to destination
-		QHashIterator<QString, sFileInfo *> qhiI(qhSourceFiles);
+		QHashIterator<QString, QDateTime> qhiI(qhSourceFiles);
 
 		while (qhiI.hasNext() && !bStop) {
 			int iCommand;
@@ -127,16 +37,12 @@ void cSynchronize::CopyFiles(const eDirection edDirection)
 			sCommand scCommand;
 
 			qhiI.next();
-			if (!bBufferedSource || CanCopy(qhiI, edDirection)) {
-				qfFile = new QFile(quSource.path() + "/" + qhiI.key());
-				qfFile->open(QIODevice::ReadOnly);
-				scCommand.qfFile = qfFile;
-				scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
-				iCommand = qfDestination.put(qfFile, quDestination.path() + "/" + qhiI.key());
-				qhCommands.insert(iCommand, scCommand);
-			} else {
-				emit SendMessage(tr("Skipping: %1").arg(qhiI.key()));
-			} // if else
+			qfFile = new QFile(quSource.path() + "/" + qhiI.key());
+			qfFile->open(QIODevice::ReadOnly);
+			scCommand.qfFile = qfFile;
+			scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
+			iCommand = qfDestination.put(qfFile, quDestination.path() + "/" + qhiI.key());
+			qhCommands.insert(iCommand, scCommand);
 		} // while
 	} // if else
 } // CopyFiles
@@ -146,28 +52,26 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 {
 	if (edDirection == Source) {
 		// create on source
-		QHashIterator<QString, sFileInfo *> qhiI(qhDestinationDirectories);
+		int iI;
 
-		while (qhiI.hasNext() && !bStop) {
-			qhiI.next();
-			if (!qhSourceDirectories.contains(qhiI.key())) {
+		for (iI = 0; iI < qqDestinationDirectories.count() && !bStop; iI++) {
+			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
 				QDir qdDir;
 
-				emit SendMessage(tr("Creating: %1").arg(qhiI.key()));
-				qdDir.mkdir(quSource.path() + "/" + qhiI.key());
+				emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
+				qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
 			} // if
-		} // while
+		} // for
 	} else {
 		// create on destination
-		QHashIterator<QString, sFileInfo *> qhiI(qhSourceDirectories);
+		int iI;
 
-		while (qhiI.hasNext() && !bStop) {
-			qhiI.next();
-			if (!qhDestinationDirectories.contains(qhiI.key())) {
-				emit SendMessage(tr("Creating: %1").arg(qhiI.key()));
-				qfDestination.mkdir(quDestination.path() + "/" + qhiI.key());
+		for (iI = 0; iI < qqSourceDirectories.count() && !bStop; iI++) {
+			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
+				emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
+				qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI));
 			} // if
-		} // while
+		} // for
 	} // if else
 } // CreateDirectories
 
@@ -200,53 +104,51 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 {
 	if (edDirection == Source) {
 		// delete on source
-		QHashIterator<QString, sFileInfo *> qhiDirectories(qhSourceDirectories);
-		QHashIterator<QString, sFileInfo *> qhiFiles(qhSourceFiles);
+		int iI;
+		QHashIterator<QString, QDateTime> qhiI(qhSourceFiles);
 
 		// files
-		while (qhiFiles.hasNext() && !bStop) {
-			qhiFiles.next();
-			if (!qhDestinationFiles.contains(qhiFiles.key())) {
+		while (qhiI.hasNext() && !bStop) {
+			qhiI.next();
+			if (!qhDestinationFiles.contains(qhiI.key())) {
 				QFile qfFile;
 
-				qfFile.setFileName(quSource.path() + "/" + qhiFiles.key());
-				emit SendMessage(tr("Removing: %1").arg(qhiFiles.key()));
+				qfFile.setFileName(quSource.path() + "/" + qhiI.key());
+				emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
 				qfFile.remove();
 			} // if
 		} // while
 
 		// directories
-		while (qhiDirectories.hasNext() && !bStop) {
-			qhiDirectories.next();
-			if (!qhDestinationDirectories.contains(qhiDirectories.key())) {
+		for (iI = qqSourceDirectories.count() - 1; iI >= 0 && !bStop; iI--) {
+			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
 				QDir qdDir;
 
-				emit SendMessage(tr("Removing: [%1]").arg(qhiDirectories.key()));
-				qdDir.rmdir(quSource.path() + "/" + qhiDirectories.key());
+				emit SendMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)));
+				qdDir.rmdir(quSource.path() + "/" + qqSourceDirectories.at(iI));
 			} // if
-		} // while
+		} // for
 	} else {
 		// delete on destination
-		QHashIterator<QString, sFileInfo *> qhiDirectories(qhDestinationDirectories);
-		QHashIterator<QString, sFileInfo *> qhiFiles(qhDestinationFiles);
+		int iI;
+		QHashIterator<QString, QDateTime> qhiI(qhDestinationFiles);
 
 		// files
-		while (qhiFiles.hasNext() && !bStop) {
-			qhiFiles.next();
-			if (!qhSourceFiles.contains(qhiFiles.key())) {
-				emit SendMessage(tr("Removing: %1").arg(qhiFiles.key()));
-				qfDestination.remove(quDestination.path() + "/" + qhiFiles.key());
+		while (qhiI.hasNext() && !bStop) {
+			qhiI.next();
+			if (!qhSourceFiles.contains(qhiI.key())) {
+				emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
+				qfDestination.remove(quDestination.path() + "/" + qhiI.key());
 			} // if
 		} // while
 
 		// directories
-		while (qhiDirectories.hasNext() && !bStop) {
-			qhiDirectories.next();
-			if (!qhSourceDirectories.contains(qhiDirectories.key())) {
-				emit SendMessage(tr("Removing: [%1]").arg(qhiDirectories.key()));
-				qfDestination.rmdir(quDestination.path() + "/" + qhiDirectories.key());
+		for (iI = qqDestinationDirectories.count() - 1 && !bStop; iI >= 0; iI--) {
+			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
+				emit SendMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)));
+				qfDestination.rmdir(quDestination.path() + "/" + qqDestinationDirectories.at(iI));
 			} // if
-		} // while
+		} // for
 	} // if else
 } // DeleteObsolete
 
@@ -256,47 +158,12 @@ void cSynchronize::DisconnectDestination()
 	qfDestination.close();
 } // DisconnectDestination
 
-// fill source files and directories tables from buffer
-void cSynchronize::FillSourceLists(const eDirection edDirection)
-{
-	QDomNode qdnBuffer, qdnItem;
-	QHash<QString, sFileInfo *> *qhDirectories, *qhFiles;
-
-	if (edDirection == Source) {
-		qhDirectories = &qhSourceDirectories;
-		qhFiles = &qhSourceFiles;
-	} else {
-		qhDirectories = &qhDestinationDirectories;
-		qhFiles = &qhDestinationFiles;
-	} // if else
-
-	qdnBuffer = ccConnections->GetBuffer(qdnConnection, edDirection);
-	qdnItem = qdnBuffer.firstChild();
-	
-	while (!qdnItem.isNull()) {
-		sFileInfo *sfiValue;
-
-		sfiValue = new sFileInfo();
-		sfiValue->qdnXMLItem = qdnItem;
-		if (qdnItem.toElement().attribute(qsTYPE) == qsDIRECTORY) {
-			// directory
-			qhDirectories->insert(qdnItem.namedItem(qsNAME).toElement().text(), sfiValue);
-		} else {
-			// file
-			sfiValue->qdtLastModified = QDateTime::fromString(qdnItem.namedItem(qsLAST_MODIFIED).toElement().text());
-			qhFiles->insert(qdnItem.namedItem(qsNAME).toElement().text(), sfiValue);
-		} // if else
-
-		qdnItem = qdnItem.nextSibling();
-	} // while
-} // FillSourceLists
-
 // fills files and directories info
 void cSynchronize::GetFileList(const eDirection edDirection)
 {
 	if (edDirection == Source) {
 		// source
-		if (!bBufferedSource || !ccConnections->BufferExists(edDirection, qdnConnection)) {
+		if (!bBufferedDownload) {
 			// get source from disk
 			bool bIncludeSubdirectories;
 			QDir qdSource;
@@ -319,11 +186,8 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 				qfilCurrentList = qdSource.entryInfoList(QDir::Files);
 				// add files to global
 				for (iI = 0; iI < qfilCurrentList.count(); iI++) {
-					sFileInfo *sfiValue;
-
-					sfiValue = new sFileInfo();
-					sfiValue->qdtLastModified = qfilCurrentList.at(iI).lastModified();
-					qhSourceFiles.insert(qsCurrentDirectory + qfilCurrentList.at(iI).fileName(), sfiValue);
+					qhSourceFiles.insert(qsCurrentDirectory + qfilCurrentList.at(iI).fileName(),
+												qfilCurrentList.at(iI).lastModified());
 					emit SendMessage(tr("Source: %1").arg(qfilCurrentList.at(iI).fileName()));
 				} // for
 
@@ -333,10 +197,7 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 					QQueue<QString> qqCurrentDirectories;
 
 					for (iI = 0; iI < qslCurrentList.count(); iI++) {
-						sFileInfo *sfiValue;
-
-						sfiValue = new sFileInfo();
-						qhSourceDirectories.insert(qsCurrentDirectory + qslCurrentList.at(iI), sfiValue);
+						qqSourceDirectories += qsCurrentDirectory + qslCurrentList.at(iI);
 						qqCurrentDirectories.enqueue(qslCurrentList.at(iI));
 						emit SendMessage(tr("Source: [%1]").arg(qslCurrentList.at(iI)));
 					} // for
@@ -361,34 +222,31 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 					qsCurrentDirectory += qsDirectory + "/";
 				} // if
 			} while (!qsDirectoryLevel.empty() && bIncludeSubdirectories && !bStop);
-
-			// buffer
-			if (bBufferedSource) {
-				BuildBuffer(edDirection);
-			} // if
-		} else {
-			// get source from buffer
-			FillSourceLists(edDirection);
-		} // if else
+		} // if
+		if (bBufferedUpload) {
+			// get source buffer
+			qdnSourceBuffer = ccConnections->GetBuffer(qdnConnection, edDirection);
+		} // if
 	} else {
 		// destination
-		if (!bBufferedDestination || !ccConnections->BufferExists(edDirection, qdnConnection)) {
+		if (!bBufferedUpload) {
 			// get destination from disk
 			qfDestination.cd(quDestination.path());
 			// list current directory
 			qfDestination.list();
 			// rest as in source in on_qfDestination_commandFinished
-		} else {
-			// get destination from buffer
-			FillSourceLists(edDirection);
-		} // if else
+		} // if
+		if (bBufferedDownload) {
+			// get destination buffer
+			qdnDestinationBuffer = ccConnections->GetBuffer(qdnConnection, edDirection);
+		} // if
 	} // if else
 } // GetFileList
 
 // initialize class
 void cSynchronize::Initialization()
 {
-	// connect XML
+	// connect to XML
 	if (!ccConnections) {
 		ccConnections = new cConnections();
 		bGUIRunning = false;
@@ -397,9 +255,9 @@ void cSynchronize::Initialization()
 	} // if else
 
 	// clear from previous run
-	qhDestinationDirectories.clear();
+	qqDestinationDirectories.clear();
 	qhDestinationFiles.clear();
-	qhSourceDirectories.clear();
+	qqSourceDirectories.clear();
 	qhSourceFiles.clear();
 	qsCurrentDirectory.clear();
 	qsDirectoryLevel.clear();
@@ -410,15 +268,15 @@ void cSynchronize::Initialization()
 	// initialize variables
 	if (ccConnections->GetProperty(qdnConnection, cConnections::Buffered) == qsTRUE) {
 		if (ccConnections->GetProperty(qdnConnection, cConnections::SynchronizationType) == qsUPLOAD) {
-			bBufferedSource = true;
-			bBufferedDestination = false;
+			bBufferedUpload = true;
+			bBufferedDownload = false;
 		} else {
-			bBufferedSource = false;
-			bBufferedDestination = true;
+			bBufferedUpload = false;
+			bBufferedDownload = true;
 		} // if else
 	} else {
-		bBufferedSource = false;
-		bBufferedDestination = false;
+		bBufferedUpload = false;
+		bBufferedDownload = false;
 	} // if else
 	bStop = false;
 } // Initialization
@@ -445,7 +303,7 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 	// List
 	if (qfDestination.currentCommand() == QFtp::List) {
 		bool bIncludeSubdirectories;
-		QHashIterator<QString, sFileInfo *> qhiI(qhCurrentDestinationFiles);
+		QHashIterator<QString, QDateTime> qhiI(qhCurrentDestinationFiles);
 		QString qsDirectory;
 
 		// add files to global
@@ -458,10 +316,7 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 		if (!qqCurrentDestinationDirectories.empty()) {
 			qsDirectoryLevel.push(qqCurrentDestinationDirectories);
 			while (!qqCurrentDestinationDirectories.empty()) {
-				sFileInfo *sfiValue;
-
-				sfiValue = new sFileInfo();
-				qhDestinationDirectories.insert(qsCurrentDirectory + qqCurrentDestinationDirectories.dequeue(), sfiValue);
+				qqDestinationDirectories += qsCurrentDirectory + qqCurrentDestinationDirectories.dequeue();
 			} // while
 		} else {
 			// no directories -> go back
@@ -496,11 +351,6 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 			qfDestination.cd(qsDirectory);
 			qfDestination.list();
 		} else {
-			// buffer
-			if (bBufferedDestination) {
-				BuildBuffer(Destination);
-			} // if
-
 			// continue in synchronization
 			Synchronize2();
 		} // if else
@@ -558,12 +408,8 @@ void cSynchronize::on_qfDestination_listInfo(const QUrlInfo &i)
 			qsMessage += QString("[%1]").arg(i.name());
 			qqCurrentDestinationDirectories.enqueue(i.name());
 		} else {
-			sFileInfo *sfiValue;
-
 			qsMessage += i.name();
-			sfiValue = new sFileInfo();
-			sfiValue->qdtLastModified = i.lastModified();
-			qhCurrentDestinationFiles.insert(i.name(), sfiValue);
+			qhCurrentDestinationFiles.insert(i.name(), i.lastModified());
 		} // if else
 		emit SendMessage(qsMessage);
 	} // if

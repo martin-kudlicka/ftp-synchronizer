@@ -18,11 +18,13 @@ const QString qsINCLUDE_SUBDIRECTORIES = "IncludeSubdirectories";
 const QString qsFALSE = "False";
 const QString qsLAST_RUN = "LastRun";
 const QString qsMESSAGE = "Message";
+const QString qsNAME = "Name";
 const QString qsPASSWORD = "Password";
 const QString qsPATH = "Path";
 const QString qsSETTINGS = "Settings";
 const QString qsSOURCE = "Source";
 const QString qsSYNCHRONIZATION = "Synchronization";
+const QString qsTYPE = "Type";
 const QString qsUSERNAME = "Username";
 
 // save changes into XML
@@ -52,24 +54,6 @@ void cConnections::ApplyChanges(const eModify emModify, QDomNode qdnParent, cons
 
 	Save();
 } // ApplyChanges
-
-// checks if exists the file and folder buffer
-bool cConnections::BufferExists(const eDirection edDirection, const QDomNode qdnConnection)
-{
-	QDomNode qdnDirection;
-
-	if (edDirection == Source) {
-		qdnDirection = qdnConnection.namedItem(qsSOURCE);
-	} else {
-		qdnDirection = qdnConnection.namedItem(qsDESTINATION);
-	} // if else
-
-	if (qdnDirection.namedItem(qsBUFFER).isNull()) {
-		return false;
-	} else {
-		return true;
-	} // if else
-} // BufferExists
 
 // load XML file with connections
 cConnections::cConnections()
