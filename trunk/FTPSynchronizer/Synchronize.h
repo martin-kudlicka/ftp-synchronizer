@@ -33,10 +33,10 @@ class cSynchronize : private QObject
 		bool bGUIRunning, bStop;
 		QFtp qfDestination;
 		QHash<int, sCommand> qhCommands;
+		QHash<QString, QDateTime> qhCurrentDestinationFiles, qhDestinationFiles, qhSourceFiles;
 		QStack<QQueue<QString> > qsDirectoryLevel;
 		QString qsCurrentDirectory;
-		QQueue<QString> qqCurrentDestinationDirectories, qqCurrentDestinationFiles, qqDestinationDirectories,
-							 qqDestinationFiles, qqSourceDirectories, qqSourceFiles;
+		QQueue<QString> qqCurrentDestinationDirectories, qqDestinationDirectories, qqSourceDirectories;
 
 		void ConnectDestination();
 		void CopyFiles(const eDirection edDirection);
