@@ -44,12 +44,14 @@ class cSynchronize : private QObject
 		QQueue<QString> qqCurrentDestinationDirectories;
 
 		void BuildBuffer(const eDirection edDirection);
+		bool CanCopy(const QHashIterator<QString, sFileInfo *> qhiI, const eDirection edDirection);
 		void ConnectDestination();
 		void CopyFiles(const eDirection edDirection);
 		void CreateDirectories(const eDirection edDirection);
 		void Deinitialization();
 		void DeleteObsolete(const eDirection edDirection);
 		void DisconnectDestination();
+		void FillSourceLists(const eDirection edDirection);
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);
