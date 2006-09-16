@@ -23,7 +23,6 @@ void cSynchronize::CopyFiles(const eDirection edDirection)
 
 			qhiI.next();
 			qfFile = new QFile(quSource.path() + "/" + qhiI.key());
-			qfFile->open(QIODevice::WriteOnly);
 			scCommand.qfFile = qfFile;
 			scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
 			iCommand = qfDestination.get(quDestination.path() + "/" + qhiI.key(), qfFile);
@@ -346,6 +345,10 @@ void cSynchronize::on_qfDestination_commandStarted(int id)
 		sCommand scCommand;
 
 		scCommand = qhCommands.value(id);
+		if (qfDestination.currentCommand() == QFtp::Get) {
+			// open file for writing here (in CopyFiles it create all files at first)
+			scCommand.qfFile->open(QIODevice::WriteOnly);
+		} // if
 		emit SendMessage(scCommand.qsMessage);
 
 		return;
