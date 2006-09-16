@@ -37,9 +37,9 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 
 	private slots:
 		void on_cSynchronize_Done();
-		void on_cSynchronize_FTPStateChanged(int iState);
+		void on_cSynchronize_FTPStateChanged(const int iState);
 		void on_cSynchronize_Message(const QString qsMessage);
-		void on_cSynchronize_Progress(qint64 qi64Done, qint64 qi64Total);
+		void on_cSynchronize_Progress(const qint64 qi64Done, const qint64 qi64Total);
 		void on_qaAddConnection_triggered();
 		void on_qaAddFolder_triggered();
 		void on_qaEdit_triggered();

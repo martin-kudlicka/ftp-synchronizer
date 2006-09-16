@@ -7,7 +7,9 @@
 
 const QString qsCONNECTION = "Connection";
 const QString qsFOLDER = "Folder";
+const QString qsNAME = "Name";
 const QString qsTRUE = "True";
+const QString qsTYPE = "Type";
 
 enum eDirection {Destination, Source};
 
@@ -30,6 +32,7 @@ class cConnections
 
 		cConnections();
 
+		bool BufferExists(const QDomNode qdnConnection, const eDirection edDirection);
 		QDomNode FindConnection(const QString qsName);
 		QDomNode GetBuffer(const QDomNode qdnConnection, const eDirection edDirection);
 		QString GetProperty(const QDomNode qdnConnection,
@@ -53,7 +56,7 @@ class cConnections
 									 // properties
 									 const QString qsName);
 		void Remove(const QDomNode qdnConnection);
-		void SetLastRun(QDomNode qdnConnection, QDateTime qdtDateTime, QString qsMessage);
+		void SetLastRun(QDomNode qdnConnection, const QDateTime qdtDateTime, const QString qsMessage);
 
 	private:
 		QFile qfFile;

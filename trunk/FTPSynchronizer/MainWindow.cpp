@@ -37,10 +37,10 @@ cMainWindow::cMainWindow()
 	connect(this, SIGNAL(StopSynchronization()),
 			  (QObject *)&csSynchronize, SLOT(on_StopSynchronization()));
 	connect((QObject *)&csSynchronize, SIGNAL(Done()), this, SLOT(on_cSynchronize_Done()));
-	connect((QObject *)&csSynchronize, SIGNAL(FTPStateChanged(int)),
-			  this, SLOT(on_cSynchronize_FTPStateChanged(int)));
-	connect((QObject *)&csSynchronize, SIGNAL(Progress(qint64, qint64)),
-			  this, SLOT(on_cSynchronize_Progress(qint64, qint64)));
+	connect((QObject *)&csSynchronize, SIGNAL(FTPStateChanged(const int)),
+			  this, SLOT(on_cSynchronize_FTPStateChanged(const int)));
+	connect((QObject *)&csSynchronize, SIGNAL(Progress(const qint64, const qint64)),
+			  this, SLOT(on_cSynchronize_Progress(const qint64, const qint64)));
 } // cMainWindow
 
 // connection dialog accepted - make changes

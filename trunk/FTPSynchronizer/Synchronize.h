@@ -30,7 +30,7 @@ class cSynchronize : private QObject
 	private:
 		struct sCommand {QString qsMessage; QFile *qfFile;};
 
-		bool bBufferedDownload, bBufferedUpload, bGUIRunning, bStop;
+		bool bBufferedDownload, bBufferedUpload, bCreateDestinationBuffer, bCreateSourceBuffer, bGUIRunning, bStop;
 		QDomNode qdnDestinationBuffer, qdnSourceBuffer;
 		QFtp qfDestination;
 		QHash<int, sCommand> qhCommands;
@@ -42,19 +42,20 @@ class cSynchronize : private QObject
 		void ConnectDestination();
 		void CopyFiles(const eDirection edDirection);
 		void CreateDirectories(const eDirection edDirection);
+		void CreateNewBuffer(const eDirection edTarget);
 		void Deinitialization();
 		void DeleteObsolete(const eDirection edDirection);
 		void DisconnectDestination();
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);
-		void SynchronizationEnd(QString qsMessage);
+		void SynchronizationEnd(const QString qsMessage);
 		void Synchronize();
 		void Synchronize2();
 
 	signals:
-		void FTPStateChanged(int iState);
-		void Progress(qint64 qi64Done, qint64 qi64Total);
+		void FTPStateChanged(const int iState);
+		void Progress(const qint64 qi64Done, const qint64 qi64Total);
 		void SendMessage(const QString qsMessage);
 		void Done();
 

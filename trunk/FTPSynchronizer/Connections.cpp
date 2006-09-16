@@ -18,13 +18,11 @@ const QString qsINCLUDE_SUBDIRECTORIES = "IncludeSubdirectories";
 const QString qsFALSE = "False";
 const QString qsLAST_RUN = "LastRun";
 const QString qsMESSAGE = "Message";
-const QString qsNAME = "Name";
 const QString qsPASSWORD = "Password";
 const QString qsPATH = "Path";
 const QString qsSETTINGS = "Settings";
 const QString qsSOURCE = "Source";
 const QString qsSYNCHRONIZATION = "Synchronization";
-const QString qsTYPE = "Type";
 const QString qsUSERNAME = "Username";
 
 // save changes into XML
@@ -54,6 +52,24 @@ void cConnections::ApplyChanges(const eModify emModify, QDomNode qdnParent, cons
 
 	Save();
 } // ApplyChanges
+
+// checks if exists the file and folder buffer
+bool cConnections::BufferExists(const QDomNode qdnConnection, const eDirection edDirection)
+{
+	QDomNode qdnDirection;
+
+	if (edDirection == Source) {
+		qdnDirection = qdnConnection.namedItem(qsSOURCE);
+	} else {
+		qdnDirection = qdnConnection.namedItem(qsDESTINATION);
+	} // if else
+
+	if (qdnDirection.namedItem(qsBUFFER).isNull()) {
+		return false;
+	} else {
+		return true;
+	} // if else
+} // BufferExists
 
 // load XML file with connections
 cConnections::cConnections()
@@ -259,7 +275,7 @@ void cConnections::Save()
 } // Save
 
 // set last run in connection
-void cConnections::SetLastRun(QDomNode qdnConnection, QDateTime qdtDateTime, QString qsMessage)
+void cConnections::SetLastRun(QDomNode qdnConnection, const QDateTime qdtDateTime, const QString qsMessage)
 {
 	QDomNode qdnDateTime, qdnLastRun, qdnMessage;
 
