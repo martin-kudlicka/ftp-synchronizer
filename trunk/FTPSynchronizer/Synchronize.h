@@ -11,6 +11,7 @@
 #include <QHash>
 
 const QString qsDOWNLOAD = "Download";
+const QString qsUPLOAD = "Upload";
 
 class cSynchronize : private QObject
 {
@@ -27,7 +28,6 @@ class cSynchronize : private QObject
 		void Start();
 
 	private:
-		enum eDirection {Destination, Source};
 		struct sCommand {QString qsMessage; QFile *qfFile;};
 
 		bool bGUIRunning, bStop;

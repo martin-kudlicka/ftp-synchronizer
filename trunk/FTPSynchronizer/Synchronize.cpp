@@ -158,67 +158,79 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 {
 	if (edDirection == Source) {
 		// source
-		bool bIncludeSubdirectories;
-		QDir qdSource;
+		if (!ccConnections->BufferExists(edDirection, qdnConnection) || ccConnections->GetProperty(qdnConnection, cConnections::SynchronizationType) == qsUPLOAD) {
+			// get source from disk
+			bool bIncludeSubdirectories;
+			QDir qdSource;
 
-		if (ccConnections->GetProperty(qdnConnection, cConnections::IncludeSubdirectories) == qsTRUE) {
-			bIncludeSubdirectories = true;
-		} else {
-			bIncludeSubdirectories = false;
-		} // if else
+			if (ccConnections->GetProperty(qdnConnection, cConnections::IncludeSubdirectories) == qsTRUE) {
+				bIncludeSubdirectories = true;
+			} else {
+				bIncludeSubdirectories = false;
+			} // if else
 
-		qdSource.setPath(quSource.path());
+			qdSource.setPath(quSource.path());
 
-		do {
-			int iI;
-			QString qsDirectory;
-			QStringList qslCurrentList;
+			do {
+				int iI;
+				QString qsDirectory;
+				QStringList qslCurrentList;
 
-			// list current directory for files
-			qslCurrentList = qdSource.entryList(QDir::Files);
-			// add files to global
-			for (iI = 0; iI < qslCurrentList.count(); iI++) {
-				qqSourceFiles += qsCurrentDirectory + qslCurrentList.at(iI);
-				emit SendMessage(tr("Source: %1").arg(qslCurrentList.at(iI)));
-			} // for
-
-			// list current directory for directories
-			qslCurrentList = qdSource.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-			if (!qslCurrentList.empty()) {
-				QQueue<QString> qqCurrentDirectories;
-
+				// list current directory for files
+				qslCurrentList = qdSource.entryList(QDir::Files);
+				// add files to global
 				for (iI = 0; iI < qslCurrentList.count(); iI++) {
-					qqSourceDirectories += qsCurrentDirectory + qslCurrentList.at(iI);
-					qqCurrentDirectories.enqueue(qslCurrentList.at(iI));
-					emit SendMessage(tr("Source: [%1]").arg(qslCurrentList.at(iI)));
+					qqSourceFiles += qsCurrentDirectory + qslCurrentList.at(iI);
+					emit SendMessage(tr("Source: %1").arg(qslCurrentList.at(iI)));
 				} // for
-				qsDirectoryLevel.push(qqCurrentDirectories);
-			} else {
-				// no directories -> go back
-				qdSource.cd("..");
-				qsCurrentDirectory +=  "../";
-			} // if else
 
-			qsDirectory = SetDirectory(Source, &qdSource);
-			qsCurrentDirectory = QDir::cleanPath(qsCurrentDirectory);
-			if (qsCurrentDirectory.endsWith("..")) {
-				qsCurrentDirectory.clear();
-			} else {
-				if (qsCurrentDirectory != "") {
-					qsCurrentDirectory += "/";
+				// list current directory for directories
+				qslCurrentList = qdSource.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+				if (!qslCurrentList.empty()) {
+					QQueue<QString> qqCurrentDirectories;
+
+					for (iI = 0; iI < qslCurrentList.count(); iI++) {
+						qqSourceDirectories += qsCurrentDirectory + qslCurrentList.at(iI);
+						qqCurrentDirectories.enqueue(qslCurrentList.at(iI));
+						emit SendMessage(tr("Source: [%1]").arg(qslCurrentList.at(iI)));
+					} // for
+					qsDirectoryLevel.push(qqCurrentDirectories);
+				} else {
+					// no directories -> go back
+					qdSource.cd("..");
+					qsCurrentDirectory +=  "../";
+				} // if else
+
+				qsDirectory = SetDirectory(Source, &qdSource);
+				qsCurrentDirectory = QDir::cleanPath(qsCurrentDirectory);
+				if (qsCurrentDirectory.endsWith("..")) {
+					qsCurrentDirectory.clear();
+				} else {
+					if (qsCurrentDirectory != "") {
+						qsCurrentDirectory += "/";
+					} // if
+				} // if else
+				qdSource.cd(qsDirectory);
+				if (qsDirectory != "") {
+					qsCurrentDirectory += qsDirectory + "/";
 				} // if
-			} // if else
-			qdSource.cd(qsDirectory);
-			if (qsDirectory != "") {
-				qsCurrentDirectory += qsDirectory + "/";
-			} // if
-		} while (!qsDirectoryLevel.empty() && bIncludeSubdirectories && !bStop);
+			} while (!qsDirectoryLevel.empty() && bIncludeSubdirectories && !bStop);
+		} else {
+			// get source from buffer
+			// TODO GetFileList (get source from buffer)
+		} // if else
 	} else {
 		// destination
-		qfDestination.cd(quDestination.path());
-		// list current directory
-		qfDestination.list();
-		// rest as in source in on_qfDestination_commandFinished
+		if (!ccConnections->BufferExists(edDirection, qdnConnection) || ccConnections->GetProperty(qdnConnection, cConnections::SynchronizationType) == qsDOWNLOAD) {
+			// get destination from disk
+			qfDestination.cd(quDestination.path());
+			// list current directory
+			qfDestination.list();
+			// rest as in source in on_qfDestination_commandFinished
+		} else {
+			// get destination from buffer
+			// TODO GetFileList (get destination from buffer)
+		} // if else
 	} // if else
 } // GetFileList
 

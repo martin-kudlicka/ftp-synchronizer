@@ -9,11 +9,14 @@ const QString qsCONNECTION = "Connection";
 const QString qsFOLDER = "Folder";
 const QString qsTRUE = "True";
 
+enum eDirection {Destination, Source};
+
 class cConnections
 {
 	public:
 		enum eModify {Add, Modify};
-		enum eProperty {DeleteObsoleteFiles,
+		enum eProperty {Buffered,
+							 DeleteObsoleteFiles,
 							 DestinationPath,
 							 DestinationPassword,
 							 DestinationUsername,
@@ -27,6 +30,7 @@ class cConnections
 
 		cConnections();
 
+		bool BufferExists(const eDirection edDirection, const QDomNode qdnConnection);
 		QDomNode FindConnection(const QString qsName);
 		QString GetProperty(const QDomNode qdnConnection,
 								  const eProperty epProperty);
@@ -42,6 +46,7 @@ class cConnections
 										  const bool bIncludeSubdirectories,
 										  // Synchronization
 										  const QString qsSynchronization,
+										  const bool bBuffered,
 										  const bool bDeleteObsoleteFiles);
 		QDomNode ModifyFolder(const eModify emModify,
 									 QDomNode qdnParent,

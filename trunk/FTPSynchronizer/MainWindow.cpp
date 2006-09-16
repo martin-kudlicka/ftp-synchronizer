@@ -3,8 +3,6 @@
 #include <QStack>
 #include <QScrollBar>
 
-const QString qsUPLOAD = "Upload";
-
 // create of main window
 cMainWindow::cMainWindow()
 {
@@ -80,6 +78,7 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 																  ccdNewConnection->cbIncludeSubdirectories->isChecked(),
 																  // Synchronization
 																  qsSynchronization,
+																  ccdNewConnection->cbBuffered->isChecked(),
 																  ccdNewConnection->cbDeleteObsoleteFiles->isChecked());
 	} else {
 		// folder
@@ -261,6 +260,12 @@ void cMainWindow::on_qaEdit_triggered()
 			ccdNewConnection->rbUpload->setChecked(true);
 		} else {
 			ccdNewConnection->rbDownload->setChecked(true);
+		} // if else
+		qsProperty = ccConnections.GetProperty(qdnConnection, cConnections::Buffered);
+		if (qsProperty == qsTRUE) {
+			ccdNewConnection->cbBuffered->setChecked(true);
+		} else {
+			ccdNewConnection->cbBuffered->setChecked(false);
 		} // if else
 		qsProperty = ccConnections.GetProperty(qdnConnection, cConnections::DeleteObsoleteFiles);
 		if (qsProperty == qsTRUE) {

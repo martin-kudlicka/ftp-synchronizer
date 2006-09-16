@@ -1,12 +1,13 @@
 #include "Connections.h"
 
-#include "../../Common/XMLTools.h"
+#include "Common/XMLTools.h"
 #include <QStack>
 #include <QSettings>
 #include <QFileInfo>
 #include <QDir>
 
 const QString qsAPPLICATION_NAME = "FTPSynchronizer";
+const QString qsBUFFERED = "Buffered";
 const QString qsCOMPANY = "Isshou";
 const QString qsCONNECTIONS_FILE = "Connections.xml";
 const QString qsDATE_TIME = "DateTime";
@@ -52,6 +53,13 @@ void cConnections::ApplyChanges(const eModify emModify, QDomNode qdnParent, cons
 
 	Save();
 } // ApplyChanges
+
+// checks if exists the file and folder buffer
+bool cConnections::BufferExists(const eDirection edDirection, const QDomNode qdnConnection)
+{
+	// TODO BufferExists
+	return false;
+} // BufferExists
 
 // load XML file with connections
 cConnections::cConnections()
@@ -111,6 +119,7 @@ QString cConnections::GetProperty(const QDomNode qdnConnection,
 											 const eProperty epProperty)
 {
 	switch (epProperty) {
+		case Buffered:						return qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsBUFFERED).toElement().text();
 		case DeleteObsoleteFiles:		return qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsDELETE_OBSOLETE_FILES).toElement().text();
 		case DestinationPath:			return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPATH).toElement().text();
 		case DestinationPassword:		return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPASSWORD).toElement().text();
@@ -122,6 +131,7 @@ QString cConnections::GetProperty(const QDomNode qdnConnection,
 		case Type:							return qdnConnection.toElement().attributeNode(qsTYPE).value();
 	}; // switch
 
+	Q_ASSERT(false);
 	return NULL;
 } // GetProperty
 
@@ -138,6 +148,7 @@ QDomNode cConnections::ModifyConnection(const eModify emModify,
 													 const bool bIncludeSubdirectories,
 													 // Synchronization
 													 const QString qsSynchronization,
+													 const bool bBuffered,
 													 const bool bDeleteObsoleteFiles)
 {
 	QDomElement qdeProperty, qdeSubProperty;
@@ -178,6 +189,9 @@ QDomNode cConnections::ModifyConnection(const eModify emModify,
 	qdeProperty = qddXML.createElement(qsTYPE);
 	qdeSubProperty.appendChild(qdeProperty);
 	cXMLTools::SetText(qddXML, &qdeProperty, qsSynchronization);
+	qdeProperty = qddXML.createElement(qsBUFFERED);
+	qdeSubProperty.appendChild(qdeProperty);
+	cXMLTools::SetText(qddXML, &qdeProperty, bBuffered ? qsTRUE : qsFALSE);
 	qdeProperty = qddXML.createElement(qsDELETE_OBSOLETE_FILES);
 	qdeSubProperty.appendChild(qdeProperty);
 	cXMLTools::SetText(qddXML, &qdeProperty, bDeleteObsoleteFiles ? qsTRUE : qsFALSE);
