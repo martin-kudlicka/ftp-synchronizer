@@ -2,8 +2,8 @@
 
 #include "Common/XMLTools.h"
 
-const QString qsDIRECTORY = "Directory";
-const QString qsFILE = "File";
+const QString qsDIRECTORIES = "Directories";
+const QString qsFILES = "Files";
 const QString qsITEM = "Item";
 const QString qsLAST_MODIFIED = "LastModified";
 
@@ -88,6 +88,7 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 void cSynchronize::CreateNewBuffer(const eDirection edTarget)
 {
 	int iI;
+	QDomElement qdeDirectories, qdeFiles;
 	QDomNode qdnBuffer;
 	QHash<QString, QDateTime> qhFiles;
 	QHash<QString, QDateTime>::const_iterator qhFilesIterator;
@@ -104,24 +105,24 @@ void cSynchronize::CreateNewBuffer(const eDirection edTarget)
 	qhFilesIterator = qhFiles.constBegin();
 
 	// directories
+	qdeDirectories = ccConnections->qddXML.createElement(qsDIRECTORIES);
+	qdnBuffer.appendChild(qdeDirectories);
 	for (iI = 0; iI < qqDirectories.count(); iI++) {
-		QDomElement qdeItem, qdeName;
+		QDomElement qdeName;
 
-		qdeItem = ccConnections->qddXML.createElement(qsITEM);
-		qdnBuffer.appendChild(qdeItem);
-		qdeItem.setAttribute(qsTYPE, qsDIRECTORY);
 		qdeName = ccConnections->qddXML.createElement(qsNAME);
-		qdeItem.appendChild(qdeName);
+		qdeDirectories.appendChild(qdeName);
 		cXMLTools::SetText(ccConnections->qddXML, &qdeName, qqDirectories.at(iI));
 	} // for
 
 	// files
+	qdeFiles = ccConnections->qddXML.createElement(qsFILES);
+	qdnBuffer.appendChild(qdeFiles);
 	while (qhFilesIterator != qhFiles.constEnd()) {
 		QDomElement qdeItem, qdeLastModified, qdeName;
 
 		qdeItem = ccConnections->qddXML.createElement(qsITEM);
-		qdnBuffer.appendChild(qdeItem);
-		qdeItem.setAttribute(qsTYPE, qsFILE);
+		qdeFiles.appendChild(qdeItem);
 		qdeName = ccConnections->qddXML.createElement(qsNAME);
 		qdeItem.appendChild(qdeName);
 		cXMLTools::SetText(ccConnections->qddXML, &qdeName, qhFilesIterator.key());
@@ -164,27 +165,25 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 		// delete on source
 		if (bBufferedDownload) {
 			// buffered
-			QDomNode qdnItem;
+			QDomNode qdnDirectories, qdnFiles, qdnItem;
 
 			// files
-			qdnItem = qdnDestinationBuffer.firstChild();
+			qdnFiles = qdnDestinationBuffer.namedItem(qsFILES);
+			qdnItem = qdnFiles.firstChild();
 			while (!qdnItem.isNull()) {
 				bool bRemove;
+				QString qsName;
 
 				bRemove = false;
-				if (IsFile(qdnItem)) {
-					QString qsName;
+				qsName = qdnItem.namedItem(qsNAME).toElement().text();
+				if (!qhDestinationFiles.contains(qsName)) {
+					QFile qfFile;
 
-					qsName = qdnItem.namedItem(qsNAME).toElement().text();
-					if (!qhDestinationFiles.contains(qsName)) {
-						QFile qfFile;
-
-						qfFile.setFileName(quSource.path() + "/" + qsName);
-						emit SendMessage(tr("Removing: %1").arg(qsName));
-						qfFile.remove();
-						// remove from buffer
-						bRemove = true;
-					} // if
+					qfFile.setFileName(quSource.path() + "/" + qsName);
+					emit SendMessage(tr("Removing: %1").arg(qsName));
+					qfFile.remove();
+					// remove from buffer
+					bRemove = true;
 				} // if
 				if (bRemove) {
 					QDomNode qdnRemove;
@@ -198,32 +197,30 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 			} // while
 
 			// directories
-			qdnItem = qdnDestinationBuffer.firstChild();
+			qdnDirectories = qdnDestinationBuffer.namedItem(qsDIRECTORIES);
+			qdnItem = qdnDirectories.lastChild();
 			while (!qdnItem.isNull()) {
 				bool bRemove;
+				QString qsName;
 
 				bRemove = false;
-				if (!IsFile(qdnItem)) {
-					QString qsName;
+				qsName = qdnItem.toElement().text();
+				if (qqDestinationDirectories.indexOf(qsName) == -1) {
+					QDir qdDir;
 
-					qsName = qdnItem.namedItem(qsNAME).toElement().text();
-					if (qqDestinationDirectories.indexOf(qsName) == -1) {
-						QDir qdDir;
-
-						emit SendMessage(tr("Removing: [%1]").arg(qsName));
-						qdDir.rmdir(quSource.path() + "/" + qsName);
-						// remove from buffer
-						bRemove = true;
-					} // if
+					emit SendMessage(tr("Removing: [%1]").arg(qsName));
+					qdDir.rmdir(quSource.path() + "/" + qsName);
+					// remove from buffer
+					bRemove = true;
 				} // if
 				if (bRemove) {
 					QDomNode qdnRemove;
 
 					qdnRemove = qdnItem;
-					qdnItem = qdnItem.nextSibling();
+					qdnItem = qdnItem.previousSibling();
 					qdnRemove.parentNode().removeChild(qdnRemove);
 				} else {
-					qdnItem = qdnItem.nextSibling();
+					qdnItem = qdnItem.previousSibling();
 				} // if else
 			} // while
 		} else {
@@ -257,42 +254,40 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 		// delete on destination
 		if (bBufferedUpload) {
 			// buffered
-			QDomNode qdnItem;
+			QDomNode qdnDirectories, qdnFiles, qdnItem;
 
 			// files
-			qdnItem = qdnSourceBuffer.firstChild();
+			qdnFiles = qdnSourceBuffer.namedItem(qsFILES);
+			qdnItem = qdnFiles.firstChild();
 			while (!qdnItem.isNull()) {
-				if (IsFile(qdnItem)) {
-					QString qsName;
+				QString qsName;
 
-					qsName = qdnItem.namedItem(qsNAME).toElement().text();
-					if (!qhSourceFiles.contains(qsName)) {
-						sCommand scCommand;
+				qsName = qdnItem.namedItem(qsNAME).toElement().text();
+				if (!qhSourceFiles.contains(qsName)) {
+					sCommand scCommand;
 
-						scCommand.qdnItem = qdnItem;
-						emit SendMessage(tr("Removing: %1").arg(qsName));
-						qhCommands.insert(qfDestination.remove(quDestination.path() + "/" + qsName), scCommand);
-					} // if
+					scCommand.qdnItem = qdnItem;
+					emit SendMessage(tr("Removing: %1").arg(qsName));
+					qhCommands.insert(qfDestination.remove(quDestination.path() + "/" + qsName), scCommand);
 				} // if
 				qdnItem = qdnItem.nextSibling();
 			} // while
 
 			// directories
-			qdnItem = qdnSourceBuffer.firstChild();
+			qdnDirectories = qdnSourceBuffer.namedItem(qsDIRECTORIES);
+			qdnItem = qdnDirectories.lastChild();
 			while (!qdnItem.isNull()) {
-				if (!IsFile(qdnItem)) {
-					QString qsName;
+				QString qsName;
 
-					qsName = qdnItem.namedItem(qsNAME).toElement().text();
-					if (qqSourceDirectories.indexOf(qsName) == -1) {
-						sCommand scCommand;
+				qsName = qdnItem.toElement().text();
+				if (qqSourceDirectories.indexOf(qsName) == -1) {
+					sCommand scCommand;
 
-						scCommand.qdnItem = qdnItem;
-						emit SendMessage(tr("Removing: [%1]").arg(qsName));
-						qhCommands.insert(qfDestination.rmdir(quDestination.path() + "/" + qsName), scCommand);
-					} // if
+					scCommand.qdnItem = qdnItem;
+					emit SendMessage(tr("Removing: [%1]").arg(qsName));
+					qhCommands.insert(qfDestination.rmdir(quDestination.path() + "/" + qsName), scCommand);
 				} // if
-				qdnItem = qdnItem.nextSibling();
+				qdnItem = qdnItem.previousSibling();
 			} // while
 		} else {
 			// not buffered
@@ -454,16 +449,6 @@ void cSynchronize::Initialization()
 	bStop = false;
 } // Initialization
 
-// returns true if qdnItem is info about file
-bool cSynchronize::IsFile(const QDomNode qdnItem)
-{
-	if (qdnItem.toElement().attribute(qsTYPE) == qsFILE) {
-		return true;
-	} else {
-		return false;
-	} // if else
-} // IsFile
-
 // single FTP command finished
 void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 {
@@ -531,6 +516,7 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 			// next round...
 #ifdef _DEBUG
 		emit SendMessage(tr("Change: %1").arg(qsDirectory));
+		qDebug("GuildFTPd");
 #endif
 			qfDestination.cd(qsDirectory);
 			qfDestination.list();

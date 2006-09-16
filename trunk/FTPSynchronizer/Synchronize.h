@@ -51,7 +51,6 @@ class cSynchronize : private QObject
 		void DisconnectDestination();
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
-		bool IsFile(const QDomNode qdnItem);
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);
 		void SynchronizationEnd(const QString qsMessage);
 		void Synchronize();
