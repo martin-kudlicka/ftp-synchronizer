@@ -28,7 +28,10 @@ class cSynchronize : private QObject
 		void Start();
 
 	private:
-		struct sCommand {QString qsMessage; QFile *qfFile;};
+		struct sCommand {QString qsMessage;	// CopyFiles
+							  QFile *qfFile;		// CopyFiles
+							  QDomNode qdnItem;	// DeleteObsolete
+		}; // sCommand
 
 		bool bBufferedDownload, bBufferedUpload, bCreateDestinationBuffer, bCreateSourceBuffer, bGUIRunning, bStop;
 		QDomNode qdnDestinationBuffer, qdnSourceBuffer;
@@ -48,6 +51,7 @@ class cSynchronize : private QObject
 		void DisconnectDestination();
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
+		bool IsFile(const QDomNode qdnItem);
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);
 		void SynchronizationEnd(const QString qsMessage);
 		void Synchronize();

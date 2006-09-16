@@ -160,54 +160,162 @@ void cSynchronize::Deinitialization()
 // delete obsolete files and folders
 void cSynchronize::DeleteObsolete(const eDirection edDirection)
 {
-	// TODO watch buffer
 	if (edDirection == Source) {
 		// delete on source
-		int iI;
-		QHashIterator<QString, QDateTime> qhiI(qhSourceFiles);
+		if (bBufferedDownload) {
+			// buffered
+			QDomNode qdnItem;
 
-		// files
-		while (qhiI.hasNext() && !bStop) {
-			qhiI.next();
-			if (!qhDestinationFiles.contains(qhiI.key())) {
-				QFile qfFile;
+			// files
+			qdnItem = qdnDestinationBuffer.firstChild();
+			while (!qdnItem.isNull()) {
+				bool bRemove;
 
-				qfFile.setFileName(quSource.path() + "/" + qhiI.key());
-				emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
-				qfFile.remove();
-			} // if
-		} // while
+				bRemove = false;
+				if (IsFile(qdnItem)) {
+					QString qsName;
 
-		// directories
-		for (iI = qqSourceDirectories.count() - 1; iI >= 0 && !bStop; iI--) {
-			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
-				QDir qdDir;
+					qsName = qdnItem.namedItem(qsNAME).toElement().text();
+					if (!qhDestinationFiles.contains(qsName)) {
+						QFile qfFile;
 
-				emit SendMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)));
-				qdDir.rmdir(quSource.path() + "/" + qqSourceDirectories.at(iI));
-			} // if
-		} // for
+						qfFile.setFileName(quSource.path() + "/" + qsName);
+						emit SendMessage(tr("Removing: %1").arg(qsName));
+						qfFile.remove();
+						// remove from buffer
+						bRemove = true;
+					} // if
+				} // if
+				if (bRemove) {
+					QDomNode qdnRemove;
+
+					qdnRemove = qdnItem;
+					qdnItem = qdnItem.nextSibling();
+					qdnRemove.parentNode().removeChild(qdnRemove);
+				} else {
+					qdnItem = qdnItem.nextSibling();
+				} // if else
+			} // while
+
+			// directories
+			qdnItem = qdnDestinationBuffer.firstChild();
+			while (!qdnItem.isNull()) {
+				bool bRemove;
+
+				bRemove = false;
+				if (!IsFile(qdnItem)) {
+					QString qsName;
+
+					qsName = qdnItem.namedItem(qsNAME).toElement().text();
+					if (qqDestinationDirectories.indexOf(qsName) == -1) {
+						QDir qdDir;
+
+						emit SendMessage(tr("Removing: [%1]").arg(qsName));
+						qdDir.rmdir(quSource.path() + "/" + qsName);
+						// remove from buffer
+						bRemove = true;
+					} // if
+				} // if
+				if (bRemove) {
+					QDomNode qdnRemove;
+
+					qdnRemove = qdnItem;
+					qdnItem = qdnItem.nextSibling();
+					qdnRemove.parentNode().removeChild(qdnRemove);
+				} else {
+					qdnItem = qdnItem.nextSibling();
+				} // if else
+			} // while
+		} else {
+			// not buffered
+			int iI;
+			QHashIterator<QString, QDateTime> qhiI(qhSourceFiles);
+
+			// files
+			while (qhiI.hasNext() && !bStop) {
+				qhiI.next();
+				if (!qhDestinationFiles.contains(qhiI.key())) {
+					QFile qfFile;
+
+					qfFile.setFileName(quSource.path() + "/" + qhiI.key());
+					emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
+					qfFile.remove();
+				} // if
+			} // while
+
+			// directories
+			for (iI = qqSourceDirectories.count() - 1; iI >= 0 && !bStop; iI--) {
+				if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
+					QDir qdDir;
+
+					emit SendMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)));
+					qdDir.rmdir(quSource.path() + "/" + qqSourceDirectories.at(iI));
+				} // if
+			} // for
+		} // if else
 	} else {
 		// delete on destination
-		int iI;
-		QHashIterator<QString, QDateTime> qhiI(qhDestinationFiles);
+		if (bBufferedUpload) {
+			// buffered
+			QDomNode qdnItem;
 
-		// files
-		while (qhiI.hasNext() && !bStop) {
-			qhiI.next();
-			if (!qhSourceFiles.contains(qhiI.key())) {
-				emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
-				qfDestination.remove(quDestination.path() + "/" + qhiI.key());
-			} // if
-		} // while
+			// files
+			qdnItem = qdnSourceBuffer.firstChild();
+			while (!qdnItem.isNull()) {
+				if (IsFile(qdnItem)) {
+					QString qsName;
 
-		// directories
-		for (iI = qqDestinationDirectories.count() - 1; iI >= 0 && !bStop; iI--) {
-			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
-				emit SendMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)));
-				qfDestination.rmdir(quDestination.path() + "/" + qqDestinationDirectories.at(iI));
-			} // if
-		} // for
+					qsName = qdnItem.namedItem(qsNAME).toElement().text();
+					if (!qhSourceFiles.contains(qsName)) {
+						sCommand scCommand;
+
+						scCommand.qdnItem = qdnItem;
+						emit SendMessage(tr("Removing: %1").arg(qsName));
+						qhCommands.insert(qfDestination.remove(quDestination.path() + "/" + qsName), scCommand);
+					} // if
+				} // if
+				qdnItem = qdnItem.nextSibling();
+			} // while
+
+			// directories
+			qdnItem = qdnSourceBuffer.firstChild();
+			while (!qdnItem.isNull()) {
+				if (!IsFile(qdnItem)) {
+					QString qsName;
+
+					qsName = qdnItem.namedItem(qsNAME).toElement().text();
+					if (qqSourceDirectories.indexOf(qsName) == -1) {
+						sCommand scCommand;
+
+						scCommand.qdnItem = qdnItem;
+						emit SendMessage(tr("Removing: [%1]").arg(qsName));
+						qhCommands.insert(qfDestination.rmdir(quDestination.path() + "/" + qsName), scCommand);
+					} // if
+				} // if
+				qdnItem = qdnItem.nextSibling();
+			} // while
+		} else {
+			// not buffered
+			int iI;
+			QHashIterator<QString, QDateTime> qhiI(qhDestinationFiles);
+
+			// files
+			while (qhiI.hasNext() && !bStop) {
+				qhiI.next();
+				if (!qhSourceFiles.contains(qhiI.key())) {
+					emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
+					qfDestination.remove(quDestination.path() + "/" + qhiI.key());
+				} // if
+			} // while
+
+			// directories
+			for (iI = qqDestinationDirectories.count() - 1; iI >= 0 && !bStop; iI--) {
+				if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
+					emit SendMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)));
+					qfDestination.rmdir(quDestination.path() + "/" + qqDestinationDirectories.at(iI));
+				} // if
+			} // for
+		} // if else
 	} // if else
 } // DeleteObsolete
 
@@ -319,6 +427,7 @@ void cSynchronize::Initialization()
 	} // if else
 
 	// clear from previous run
+	qhCommands.clear();
 	qqDestinationDirectories.clear();
 	qhDestinationFiles.clear();
 	qqSourceDirectories.clear();
@@ -344,6 +453,16 @@ void cSynchronize::Initialization()
 	} // if else
 	bStop = false;
 } // Initialization
+
+// returns true if qdnItem is info about file
+bool cSynchronize::IsFile(const QDomNode qdnItem)
+{
+	if (qdnItem.toElement().attribute(qsTYPE) == qsFILE) {
+		return true;
+	} else {
+		return false;
+	} // if else
+} // IsFile
 
 // single FTP command finished
 void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
@@ -375,6 +494,7 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 			qhiI.next();
 			qhDestinationFiles.insert(qsCurrentDirectory + qhiI.key(), qhiI.value());
 		} // while
+		qhCurrentDestinationFiles.clear();
 
 		// add directories to global and stack, go to antoher directory
 		if (!qqCurrentDestinationDirectories.empty()) {
@@ -423,6 +543,17 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 			// continue in synchronization
 			Synchronize2();
 		} // if else
+
+		return;
+	} // if
+
+	// Remove, Rmdir
+	if (qfDestination.currentCommand() == QFtp::Remove || qfDestination.currentCommand() == QFtp::Rmdir) {
+		sCommand scCommand;
+
+		scCommand = qhCommands.value(id);
+		scCommand.qdnItem.parentNode().removeChild(scCommand.qdnItem);
+		return;
 	} // if
 } // on_qfDestination_commandFinished
 
