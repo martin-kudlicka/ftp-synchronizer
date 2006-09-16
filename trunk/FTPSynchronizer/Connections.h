@@ -7,7 +7,9 @@
 
 const QString qsCONNECTION = "Connection";
 const QString qsFOLDER = "Folder";
+const QString qsNAME = "Name";
 const QString qsTRUE = "True";
+const QString qsTYPE = "Type";
 
 enum eDirection {Destination, Source};
 
@@ -32,6 +34,7 @@ class cConnections
 
 		bool BufferExists(const eDirection edDirection, const QDomNode qdnConnection);
 		QDomNode FindConnection(const QString qsName);
+		QDomNode GetBuffer(const QDomNode qdnConnection, const eDirection edDirection);
 		QString GetProperty(const QDomNode qdnConnection,
 								  const eProperty epProperty);
 		QDomNode ModifyConnection(const eModify emModify,

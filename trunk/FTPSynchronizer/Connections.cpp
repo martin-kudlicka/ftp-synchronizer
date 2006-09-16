@@ -18,13 +18,11 @@ const QString qsINCLUDE_SUBDIRECTORIES = "IncludeSubdirectories";
 const QString qsFALSE = "False";
 const QString qsLAST_RUN = "LastRun";
 const QString qsMESSAGE = "Message";
-const QString qsNAME = "Name";
 const QString qsPASSWORD = "Password";
 const QString qsPATH = "Path";
 const QString qsSETTINGS = "Settings";
 const QString qsSOURCE = "Source";
 const QString qsSYNCHRONIZATION = "Synchronization";
-const QString qsTYPE = "Type";
 const QString qsUSERNAME = "Username";
 
 // save changes into XML
@@ -125,6 +123,28 @@ QDomNode cConnections::FindConnection(const QString qsName)
 
 	return qdnNode;
 } // FindConnection
+
+// return pointer to buffer
+QDomNode cConnections::GetBuffer(const QDomNode qdnConnection, const eDirection edDirection)
+{
+	QDomNode qdnDirection;
+
+	if (edDirection == Source) {
+		qdnDirection = qdnConnection.namedItem(qsSOURCE);
+	} else {
+		qdnDirection = qdnConnection.namedItem(qsDESTINATION);
+	} // if else
+
+	if (qdnDirection.namedItem(qsBUFFER).isNull()) {
+		QDomElement qdeBuffer;
+
+		qdeBuffer = qddXML.createElement(qsBUFFER);
+		qdnDirection.appendChild(qdeBuffer);
+		return qdeBuffer;
+	} else {
+		return qdnDirection.namedItem(qsBUFFER);
+	} // if else
+} // GetBuffer
 
 // returns information about connection
 QString cConnections::GetProperty(const QDomNode qdnConnection,

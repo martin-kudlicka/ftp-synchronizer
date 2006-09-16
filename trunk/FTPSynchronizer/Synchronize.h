@@ -28,16 +28,22 @@ class cSynchronize : private QObject
 		void Start();
 
 	private:
-		struct sCommand {QString qsMessage; QFile *qfFile;};
+		struct sCommand {QString qsMessage;
+							  QFile *qfFile;
+		}; // sCommand
+		struct sFileInfo {QDateTime qdtLastModified;
+								QDomNode qdnXMLItem;
+		}; // sFileInfo
 
-		bool bGUIRunning, bStop;
+		bool bBufferedDestination, bBufferedSource, bGUIRunning, bStop;
 		QFtp qfDestination;
 		QHash<int, sCommand> qhCommands;
-		QHash<QString, QDateTime> qhCurrentDestinationFiles, qhDestinationFiles, qhSourceFiles;
+		QHash<QString, sFileInfo *> qhCurrentDestinationFiles, qhDestinationDirectories, qhDestinationFiles, qhSourceDirectories, qhSourceFiles;
 		QStack<QQueue<QString> > qsDirectoryLevel;
 		QString qsCurrentDirectory;
-		QQueue<QString> qqCurrentDestinationDirectories, qqDestinationDirectories, qqSourceDirectories;
+		QQueue<QString> qqCurrentDestinationDirectories;
 
+		void BuildBuffer(const eDirection edDirection);
 		void ConnectDestination();
 		void CopyFiles(const eDirection edDirection);
 		void CreateDirectories(const eDirection edDirection);
