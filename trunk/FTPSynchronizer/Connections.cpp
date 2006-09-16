@@ -7,6 +7,7 @@
 #include <QDir>
 
 const QString qsAPPLICATION_NAME = "FTPSynchronizer";
+const QString qsBUFFER = "Buffer";
 const QString qsBUFFERED = "Buffered";
 const QString qsCOMPANY = "Isshou";
 const QString qsCONNECTIONS_FILE = "Connections.xml";
@@ -57,8 +58,19 @@ void cConnections::ApplyChanges(const eModify emModify, QDomNode qdnParent, cons
 // checks if exists the file and folder buffer
 bool cConnections::BufferExists(const eDirection edDirection, const QDomNode qdnConnection)
 {
-	// TODO BufferExists
-	return false;
+	QDomNode qdnDirection;
+
+	if (edDirection == Source) {
+		qdnDirection = qdnConnection.namedItem(qsSOURCE);
+	} else {
+		qdnDirection = qdnConnection.namedItem(qsDESTINATION);
+	} // if else
+
+	if (qdnDirection.namedItem(qsBUFFER).isNull()) {
+		return false;
+	} else {
+		return true;
+	} // if else
 } // BufferExists
 
 // load XML file with connections

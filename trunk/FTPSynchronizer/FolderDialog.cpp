@@ -4,5 +4,5 @@
 cFolderDialog::cFolderDialog()
 {
 	setupUi(this);
-	setWindowFlags(this->windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
+	setWindowFlags(Qt::SubWindow);
 } // cFolderDialog

@@ -4,5 +4,5 @@
 cConnectionDialog::cConnectionDialog()
 {
 	setupUi(this);
-	setWindowFlags(this->windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
+	setWindowFlags(Qt::SubWindow);
 } // cConnectionDialog
