@@ -28,9 +28,11 @@ class cSynchronize : private QObject
 		void Start();
 
 	private:
-		struct sCommand {QString qsMessage;	// CopyFiles, CreateDirectories
-							  QFile *qfFile;		// CopyFiles
-							  QDomNode qdnItem;	// DeleteObsolete
+		struct sCommand {QString qsMessage;			// CopyFiles, CreateDirectories
+							  QString qsName;				// CopyFiles
+							  QDateTime qdtDateTime;	// CopyFiles
+							  QFile *qfFile;				// CopyFiles
+							  QDomNode qdnItem;			// DeleteObsolete
 		}; // sCommand
 
 		bool bBufferedDownload, bBufferedUpload, bCreateDestinationBuffer, bCreateSourceBuffer, bGUIRunning, bStop;
@@ -43,6 +45,7 @@ class cSynchronize : private QObject
 		QQueue<QString> qqCurrentDestinationDirectories, qqDestinationDirectories, qqSourceDirectories;
 
 		bool BufferContainsDirectory(const eDirection edDirection, const QString qsName);
+		bool CanCopy(const eDirection edDirection, const QHashIterator<QString, QDateTime> qhiI);
 		void ConnectDestination();
 		void CopyFiles(const eDirection edDirection);
 		void CreateDirectories(const eDirection edDirection);
@@ -53,6 +56,7 @@ class cSynchronize : private QObject
 		void DisconnectDestination();
 		void GetFileList(const eDirection edDirection);
 		void Initialization();
+		void InsertFileInBuffer(const eDirection edDirection, const QString qsName, const QDateTime qdtDateTime);
 		QString SetDirectory(const eDirection edDirection, QDir *qdDir = NULL);
 		void SynchronizationEnd(const QString qsMessage);
 		void Synchronize();

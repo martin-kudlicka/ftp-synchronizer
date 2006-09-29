@@ -146,6 +146,7 @@ void cMainWindow::on_cSynchronize_Done()
 	qaStart->setEnabled(true);
 	qaStop->setEnabled(false);
 
+	qteLog->insertPlainText(tr("Done"));
 	qpbProgress->setValue(0);
 } // on_cSynchronize_Done
 

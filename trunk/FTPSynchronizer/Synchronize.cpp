@@ -29,6 +29,34 @@ bool cSynchronize::BufferContainsDirectory(const eDirection edDirection, const Q
 	return false;
 } // BufferContainsDirectory
 
+// returns true if can do buffered copy
+bool cSynchronize::CanCopy(const eDirection edDirection, const QHashIterator<QString, QDateTime> qhiI)
+{
+	QDomNode qdnFiles, qdnItem;
+
+	if (edDirection == Source) {
+		qdnFiles = qdnDestinationBuffer.namedItem(qsFILES);
+	} else {
+		qdnFiles = qdnSourceBuffer.namedItem(qsFILES);
+	} // if else
+
+	qdnItem = qdnFiles.firstChild();
+	while (!qdnItem.isNull()) {
+		if (qdnItem.namedItem(qsNAME).toElement().text() == qhiI.key()) {
+			if (qdnItem.namedItem(qsLAST_MODIFIED).toElement().text() != qhiI.value().toString()) {
+				// date/time stamp is differend
+				return true;
+			} else {
+				// date/time stamp equals
+				return false;
+			} // if else
+		} // if
+		qdnItem = qdnItem.nextSibling();
+	} // while
+
+	return true;
+} // CanCopy
+
 // connect to FTP
 void cSynchronize::ConnectDestination()
 {
@@ -40,40 +68,87 @@ void cSynchronize::ConnectDestination()
 // copy files to destination
 void cSynchronize::CopyFiles(const eDirection edDirection)
 {
-	// TODO watch buffer
 	if (edDirection == Source) {
 		// copy to source
-		QHashIterator<QString, QDateTime> qhiI(qhDestinationFiles);
+		if (bBufferedDownload) {
+			// buffered
+			QHashIterator<QString, QDateTime> qhiI(qhDestinationFiles);
 
-		while (qhiI.hasNext() && !bStop) {
-			int iCommand;
-			QFile *qfFile;
-			sCommand scCommand;
+			while (qhiI.hasNext() && !bStop) {
 
-			qhiI.next();
-			qfFile = new QFile(quSource.path() + "/" + qhiI.key());
-			scCommand.qfFile = qfFile;
-			scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
-			iCommand = qfDestination.get(quDestination.path() + "/" + qhiI.key(), qfFile);
-			qhCommands.insert(iCommand, scCommand);
-		} // while
+				qhiI.next();
+				if (CanCopy(edDirection, qhiI)) {
+					int iCommand;
+					QFile *qfFile;
+					sCommand scCommand;
+
+					qfFile = new QFile(quSource.path() + "/" + qhiI.key());
+					scCommand.qfFile = qfFile;
+					scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
+					scCommand.qsName = qhiI.key();
+					scCommand.qdtDateTime = qhiI.value();
+					iCommand = qfDestination.get(quDestination.path() + "/" + qhiI.key(), qfFile);
+					qhCommands.insert(iCommand, scCommand);
+				} // if
+			} // while
+		} else {
+			// not buffered
+			QHashIterator<QString, QDateTime> qhiI(qhDestinationFiles);
+
+			while (qhiI.hasNext() && !bStop) {
+				int iCommand;
+				QFile *qfFile;
+				sCommand scCommand;
+
+				qhiI.next();
+				qfFile = new QFile(quSource.path() + "/" + qhiI.key());
+				scCommand.qfFile = qfFile;
+				scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
+				iCommand = qfDestination.get(quDestination.path() + "/" + qhiI.key(), qfFile);
+				qhCommands.insert(iCommand, scCommand);
+			} // while
+		} // if else
 	} else {
 		// copy to destination
-		QHashIterator<QString, QDateTime> qhiI(qhSourceFiles);
+		if (bBufferedUpload) {
+			// buffered
+			QHashIterator<QString, QDateTime> qhiI(qhSourceFiles);
 
-		while (qhiI.hasNext() && !bStop) {
-			int iCommand;
-			QFile *qfFile;
-			sCommand scCommand;
+			while (qhiI.hasNext() && !bStop) {
+				qhiI.next();
+				if (CanCopy(edDirection, qhiI)) {
+					int iCommand;
+					QFile *qfFile;
+					sCommand scCommand;
 
-			qhiI.next();
-			qfFile = new QFile(quSource.path() + "/" + qhiI.key());
-			qfFile->open(QIODevice::ReadOnly);
-			scCommand.qfFile = qfFile;
-			scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
-			iCommand = qfDestination.put(qfFile, quDestination.path() + "/" + qhiI.key());
-			qhCommands.insert(iCommand, scCommand);
-		} // while
+					qfFile = new QFile(quSource.path() + "/" + qhiI.key());
+					qfFile->open(QIODevice::ReadOnly);
+					scCommand.qfFile = qfFile;
+					scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
+					scCommand.qsName = qhiI.key();
+					scCommand.qdtDateTime = qhiI.value();
+					iCommand = qfDestination.put(qfFile, quDestination.path() + "/" + qhiI.key());
+					qhCommands.insert(iCommand, scCommand);
+				} // if
+			} // while
+		} else {
+			// not buffered
+			QHashIterator<QString, QDateTime> qhiI(qhSourceFiles);
+
+			while (qhiI.hasNext() && !bStop) {
+				int iCommand;
+				QFile *qfFile;
+				sCommand scCommand;
+
+				qhiI.next();
+				qfFile = new QFile(quSource.path() + "/" + qhiI.key());
+				qfFile->open(QIODevice::ReadOnly);
+				scCommand.qfFile = qfFile;
+				scCommand.qsMessage = tr("Copying: %1").arg(qhiI.key());
+				iCommand = qfDestination.put(qfFile, quDestination.path() + "/" + qhiI.key());
+				qhCommands.insert(iCommand, scCommand);
+			} // while
+		} // if else
 	} // if else
 } // CopyFiles
 
@@ -419,6 +494,9 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 				for (iI = 0; iI < qfilCurrentList.count(); iI++) {
 					qhSourceFiles.insert(qsCurrentDirectory + qfilCurrentList.at(iI).fileName(),
 												qfilCurrentList.at(iI).lastModified());
+#ifdef _DEBUG
+					qDebug("Source time: %s", qfilCurrentList.at(iI).lastModified().toString().toLatin1().constData());
+#endif
 					emit SendMessage(tr("Source: %1").arg(qfilCurrentList.at(iI).fileName()));
 				} // for
 
@@ -522,6 +600,41 @@ void cSynchronize::Initialization()
 	bStop = false;
 } // Initialization
 
+// insert copied file in buffer
+void cSynchronize::InsertFileInBuffer(const eDirection edDirection, const QString qsName, const QDateTime qdtLastModified)
+{
+	QDomElement qdeLastModified, qdeName;
+	QDomNode qdnFiles, qdnItem;
+
+	if (edDirection == Source) {
+		qdnFiles = qdnSourceBuffer.namedItem(qsFILES);
+	} else {
+		qdnFiles = qdnDestinationBuffer.namedItem(qsFILES);
+	} // if else
+
+	qdnItem = qdnFiles.firstChild();
+	while (!qdnItem.isNull()) {
+		qdeName = qdnItem.namedItem(qsNAME).toElement();
+		if (qdeName.text() == qsName) {
+			// file already in buffer -> actualize
+			cXMLTools::SetText(ccConnections->qddXML, &qdnItem.namedItem(qsLAST_MODIFIED).toElement(), qdtLastModified.toString());
+			return;
+		} // if
+
+		qdnItem = qdnItem.nextSibling();
+	} // while
+
+	// file not in buffer -> create new entry
+	qdnItem = ccConnections->qddXML.createElement(qsITEM);
+	qdnFiles.appendChild(qdnItem);
+	qdeName = ccConnections->qddXML.createElement(qsNAME);
+	qdnItem.appendChild(qdeName);
+	cXMLTools::SetText(ccConnections->qddXML, &qdeName, qsName);
+	qdeLastModified = ccConnections->qddXML.createElement(qsLAST_MODIFIED);
+	qdnItem.appendChild(qdeLastModified);
+	cXMLTools::SetText(ccConnections->qddXML, &qdeLastModified, qdtLastModified.toString());
+} // InsertFileInBuffer
+
 // single FTP command finished
 void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 {
@@ -531,13 +644,16 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 		return;
 	} // if
 
-	// Get, Put
-	if (qfDestination.currentCommand() == QFtp::Get || qfDestination.currentCommand() == QFtp::Put) {
+	// Get
+	if (qfDestination.currentCommand() == QFtp::Get) {
 		sCommand scCommand;
 
 		scCommand = qhCommands.value(id);
 		scCommand.qfFile->close();
 		scCommand.qfFile->deleteLater();
+		if (bBufferedDownload) {
+			InsertFileInBuffer(Destination, scCommand.qsName, scCommand.qdtDateTime);
+		} // if
 		return;
 	} // if
 
@@ -615,6 +731,19 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 		return;
 	} // if
 
+	// Put
+	if (qfDestination.currentCommand() == QFtp::Put) {
+		sCommand scCommand;
+
+		scCommand = qhCommands.value(id);
+		scCommand.qfFile->close();
+		scCommand.qfFile->deleteLater();
+		if (bBufferedUpload) {
+			InsertFileInBuffer(Source, scCommand.qsName, scCommand.qdtDateTime);
+		} // if
+		return;
+	} // if
+
 	// Remove, Rmdir
 	if ((qfDestination.currentCommand() == QFtp::Remove || qfDestination.currentCommand() == QFtp::Rmdir) && !error) {
 		sCommand scCommand;
@@ -677,6 +806,9 @@ void cSynchronize::on_qfDestination_listInfo(const QUrlInfo &i)
 			qqCurrentDestinationDirectories.enqueue(i.name());
 		} else {
 			qsMessage += i.name();
+#ifdef _DEBUG
+			qDebug("Destination time: %s", i.lastModified().toString().toLatin1().constData());
+#endif
 			qhCurrentDestinationFiles.insert(i.name(), i.lastModified());
 		} // if else
 		emit SendMessage(qsMessage);
