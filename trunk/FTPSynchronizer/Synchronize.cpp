@@ -165,7 +165,7 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 				if (!BufferContainsDirectory(Destination, qqDestinationDirectories.at(iI))) {
 					QDir qdDir;
 
-					emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
+					emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)), ForSource);
 					qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
 					CreateDirectoryInBuffer(Destination, qqDestinationDirectories.at(iI));
 				} // if
@@ -178,7 +178,7 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 				if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
 					QDir qdDir;
 
-					emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
+					emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)), ForSource);
 					qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
 				} // if
 			} // for
@@ -193,7 +193,7 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 				if (!BufferContainsDirectory(Source, qqSourceDirectories.at(iI))) {
 					sCommand scCommand;
 
-					emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
+					emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)), ForDestination);
 					scCommand.qsMessage = qqSourceDirectories.at(iI);
 					qhCommands.insert(qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI)), scCommand);
 				} // if
@@ -204,7 +204,7 @@ void cSynchronize::CreateDirectories(const eDirection edDirection)
 
 			for (iI = 0; iI < qqSourceDirectories.count() && !bStop; iI++) {
 				if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
-					emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
+					emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)), ForDestination);
 					qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI));
 				} // if
 			} // for
@@ -324,7 +324,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 					QFile qfFile;
 
 					qfFile.setFileName(quSource.path() + "/" + qsName);
-					emit SendMessage(tr("Removing: %1").arg(qsName));
+					emit SendMessage(tr("Removing: %1").arg(qsName), ForDestination);
 					qfFile.remove();
 					// remove from buffer
 					bRemove = true;
@@ -352,7 +352,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 				if (qqDestinationDirectories.indexOf(qsName) == -1) {
 					QDir qdDir;
 
-					emit SendMessage(tr("Removing: [%1]").arg(qsName));
+					emit SendMessage(tr("Removing: [%1]").arg(qsName), ForSource);
 					qdDir.rmdir(quSource.path() + "/" + qsName);
 					// remove from buffer
 					bRemove = true;
@@ -379,7 +379,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 					QFile qfFile;
 
 					qfFile.setFileName(quSource.path() + "/" + qhiI.key());
-					emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
+					emit SendMessage(tr("Removing: %1").arg(qhiI.key()), ForDestination);
 					qfFile.remove();
 				} // if
 			} // while
@@ -389,7 +389,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 				if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
 					QDir qdDir;
 
-					emit SendMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)));
+					emit SendMessage(tr("Removing: [%1]").arg(qqSourceDirectories.at(iI)), ForSource);
 					qdDir.rmdir(quSource.path() + "/" + qqSourceDirectories.at(iI));
 				} // if
 			} // for
@@ -411,7 +411,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 					sCommand scCommand;
 
 					scCommand.qdnItem = qdnItem;
-					emit SendMessage(tr("Removing: %1").arg(qsName));
+					emit SendMessage(tr("Removing: %1").arg(qsName), ForDestination);
 					qhCommands.insert(qfDestination.remove(quDestination.path() + "/" + qsName), scCommand);
 				} // if
 				qdnItem = qdnItem.nextSibling();
@@ -428,7 +428,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 					sCommand scCommand;
 
 					scCommand.qdnItem = qdnItem;
-					emit SendMessage(tr("Removing: [%1]").arg(qsName));
+					emit SendMessage(tr("Removing: [%1]").arg(qsName), ForDestination);
 					qhCommands.insert(qfDestination.rmdir(quDestination.path() + "/" + qsName), scCommand);
 				} // if
 				qdnItem = qdnItem.previousSibling();
@@ -442,7 +442,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 			while (qhiI.hasNext() && !bStop) {
 				qhiI.next();
 				if (!qhSourceFiles.contains(qhiI.key())) {
-					emit SendMessage(tr("Removing: %1").arg(qhiI.key()));
+					emit SendMessage(tr("Removing: %1").arg(qhiI.key()), ForDestination);
 					qfDestination.remove(quDestination.path() + "/" + qhiI.key());
 				} // if
 			} // while
@@ -450,7 +450,7 @@ void cSynchronize::DeleteObsolete(const eDirection edDirection)
 			// directories
 			for (iI = qqDestinationDirectories.count() - 1; iI >= 0 && !bStop; iI--) {
 				if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
-					emit SendMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)));
+					emit SendMessage(tr("Removing: [%1]").arg(qqDestinationDirectories.at(iI)), ForDestination);
 					qfDestination.rmdir(quDestination.path() + "/" + qqDestinationDirectories.at(iI));
 				} // if
 			} // for
@@ -497,7 +497,7 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 #ifdef _DEBUG
 					qDebug("Source time: %s", qfilCurrentList.at(iI).lastModified().toString().toLatin1().constData());
 #endif
-					emit SendMessage(tr("Source: %1").arg(qfilCurrentList.at(iI).fileName()));
+					emit SendMessage(tr("Source: %1").arg(qfilCurrentList.at(iI).fileName()), ForSource);
 				} // for
 
 				// list current directory for directories
@@ -508,7 +508,7 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 					for (iI = 0; iI < qslCurrentList.count(); iI++) {
 						qqSourceDirectories += qsCurrentDirectory + qslCurrentList.at(iI);
 						qqCurrentDirectories.enqueue(qslCurrentList.at(iI));
-						emit SendMessage(tr("Source: [%1]").arg(qslCurrentList.at(iI)));
+						emit SendMessage(tr("Source: [%1]").arg(qslCurrentList.at(iI)), ForSource);
 					} // for
 					qsDirectoryLevel.push(qqCurrentDirectories);
 				} else {
@@ -704,7 +704,7 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 		if (!qsDirectoryLevel.empty() && bIncludeSubdirectories && !bStop) {
 			// next round...
 #ifdef _DEBUG
-		emit SendMessage(tr("Change: %1").arg(qsDirectory));
+		emit SendMessage(tr("Change: %1").arg(qsDirectory), ForDestination);
 		qDebug("GuildFTPd");
 #endif
 			qfDestination.cd(qsDirectory);
@@ -765,8 +765,10 @@ void cSynchronize::on_qfDestination_commandStarted(int id)
 		if (qfDestination.currentCommand() == QFtp::Get) {
 			// open file for writing here (in CopyFiles it create all files at first)
 			scCommand.qfFile->open(QIODevice::WriteOnly);
-		} // if
-		emit SendMessage(scCommand.qsMessage);
+			emit SendMessage(scCommand.qsMessage, ForDestination);
+		} else {
+			emit SendMessage(scCommand.qsMessage, ForSource);
+		} // if else
 
 		return;
 	} // if
@@ -783,7 +785,7 @@ void cSynchronize::on_qfDestination_done(bool error)
 {
 	if (error) {
 		// finish on error
-		emit SendMessage(tr("Error: %1").arg(qfDestination.errorString()));
+		emit SendMessage(tr("Error: %1").arg(qfDestination.errorString()), ForDestination);
 		SynchronizationEnd(qfDestination.errorString());
 		bStop = true;
 		if (qfDestination.error() != QFtp::ConnectionRefused) {
@@ -811,7 +813,7 @@ void cSynchronize::on_qfDestination_listInfo(const QUrlInfo &i)
 #endif
 			qhCurrentDestinationFiles.insert(i.name(), i.lastModified());
 		} // if else
-		emit SendMessage(qsMessage);
+		emit SendMessage(qsMessage, ForDestination);
 	} // if
 } // on_qfDestination_listInfo
 
@@ -876,7 +878,7 @@ void cSynchronize::SynchronizationEnd(const QString qsMessage)
 void cSynchronize::Synchronize()
 {
 	// get source and destination file list
-	emit SendMessage(tr("Searching for files and folders..."));
+	emit SendMessage(tr("Searching for files and folders..."), Information);
 	// TODO infinite progress bar
 	// buffer create check
 	if (bBufferedDownload && !ccConnections->BufferExists(qdnConnection, Destination)) {

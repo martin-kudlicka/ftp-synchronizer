@@ -2,6 +2,7 @@
 
 #include <QStack>
 #include <QScrollBar>
+#include <QMessageBox>
 
 // create of main window
 cMainWindow::cMainWindow()
@@ -32,8 +33,8 @@ cMainWindow::cMainWindow()
 	ShowConnectionTree();
 
 	// connect signals
-	connect((QObject *)&csSynchronize, SIGNAL(SendMessage(const QString)),
-			  this, SLOT(on_cSynchronize_Message(const QString)));
+	connect((QObject *)&csSynchronize, SIGNAL(SendMessage(const QString, const eMessageType)),
+			  this, SLOT(on_cSynchronize_Message(const QString, const eMessageType)));
 	connect(this, SIGNAL(StopSynchronization()),
 			  (QObject *)&csSynchronize, SLOT(on_StopSynchronization()));
 	connect((QObject *)&csSynchronize, SIGNAL(Done()), this, SLOT(on_cSynchronize_Done()));
@@ -146,7 +147,7 @@ void cMainWindow::on_cSynchronize_Done()
 	qaStart->setEnabled(true);
 	qaStop->setEnabled(false);
 
-	qteLog->insertPlainText(tr("Done"));
+	on_cSynchronize_Message(tr("Done\n"), Information);
 	qpbProgress->setValue(0);
 } // on_cSynchronize_Done
 
@@ -174,8 +175,19 @@ void cMainWindow::on_cSynchronize_FTPStateChanged(int iState)
 } // on_cSynchronize_FTPStateChanged
 
 // message from Synchronize class
-void cMainWindow::on_cSynchronize_Message(const QString qsMessage)
+void cMainWindow::on_cSynchronize_Message(const QString qsMessage, const eMessageType emtMessageType)
 {
+	switch (emtMessageType) {
+		case Error:				qteLog->setTextColor("red");
+									break;
+		case ForDestination:	qteLog->setTextColor("blue");
+									break;
+		case ForSource:		qteLog->setTextColor("green");
+									break;
+		case Information:		qteLog->setTextColor("black");
+									break;
+	} // switch
+
 	qteLog->insertPlainText(QString("%1\n").arg(qsMessage));
 	qteLog->verticalScrollBar()->setValue(qteLog->verticalScrollBar()->maximum());
 } // on_cSynchronize_Message
@@ -286,13 +298,15 @@ void cMainWindow::on_qaEdit_triggered()
 // remove folder or connection
 void cMainWindow::on_qaRemove_triggered()
 {
-	QDomNode qdnSelected;
-	QTreeWidgetItem *qtwiSelected;
+	if (QMessageBox::question(this, tr("Remove"), tr("Are you sure?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+		QDomNode qdnSelected;
+		QTreeWidgetItem *qtwiSelected;
 
-	qtwiSelected = qtwConnections->currentItem();
-	qdnSelected = qhTable.value(qtwiSelected);
-	ccConnections.Remove(qdnSelected);
-	delete qtwiSelected;
+		qtwiSelected = qtwConnections->currentItem();
+		qdnSelected = qhTable.value(qtwiSelected);
+		ccConnections.Remove(qdnSelected);
+		delete qtwiSelected;
+	} // if
 } // on_qaRemove_triggered
 
 // start synchronization
@@ -301,6 +315,8 @@ void cMainWindow::on_qaStart_triggered()
 	// disable controls
 	qaStart->setEnabled(false);
 	qaStop->setEnabled(true);
+
+	on_cSynchronize_Message(tr("Synchronization started"), Information);
 
 	csSynchronize.qsName = qtwConnections->currentItem()->text(0);
 	csSynchronize.ccConnections = &ccConnections;

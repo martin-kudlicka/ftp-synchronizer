@@ -6,6 +6,7 @@
 #include <QDateTime>
 
 const QString qsCONNECTION = "Connection";
+const QString qsDOWNLOAD = "Download";
 const QString qsFOLDER = "Folder";
 const QString qsNAME = "Name";
 const QString qsTRUE = "True";

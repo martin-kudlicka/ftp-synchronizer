@@ -231,6 +231,13 @@ QDomNode cConnections::ModifyConnection(const eModify emModify,
 	// copy some information when modyfying
 	if (emModify == Modify) {
 		qdnNewConnection.appendChild(qdnParent.namedItem(qsLAST_RUN).cloneNode());
+		if (bBuffered) {
+			if (qsSynchronization == qsDOWNLOAD) {
+				qdnNewConnection.namedItem(qsDESTINATION).appendChild(qdnParent.namedItem(qsDESTINATION).namedItem(qsBUFFER).cloneNode());
+			} else {
+				qdnNewConnection.namedItem(qsSOURCE).appendChild(qdnParent.namedItem(qsSOURCE).namedItem(qsBUFFER).cloneNode());
+			} // if else
+		} // if
 	} // if
 
 	ApplyChanges(emModify, qdnParent, qdnNewConnection);

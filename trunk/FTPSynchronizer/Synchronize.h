@@ -10,8 +10,9 @@
 #include <QStack>
 #include <QHash>
 
-const QString qsDOWNLOAD = "Download";
 const QString qsUPLOAD = "Upload";
+
+enum eMessageType {Error, ForDestination, ForSource, Information};
 
 class cSynchronize : private QObject
 {
@@ -65,7 +66,7 @@ class cSynchronize : private QObject
 	signals:
 		void FTPStateChanged(const int iState);
 		void Progress(const qint64 qi64Done, const qint64 qi64Total);
-		void SendMessage(const QString qsMessage);
+		void SendMessage(const QString qsMessage, const eMessageType emtMessageType);
 		void Done();
 
 	private slots:

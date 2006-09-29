@@ -83,16 +83,6 @@
       <string>Name:</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="qleSource" >
-     <property name="geometry" >
-      <rect>
-       <x>80</x>
-       <y>40</y>
-       <width>351</width>
-       <height>20</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_2" >
      <property name="geometry" >
       <rect>
@@ -142,17 +132,37 @@
       <string>Password:</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="qleDestinationPassword" >
+    <widget class="QLineEdit" name="qleName" >
      <property name="geometry" >
       <rect>
-       <x>320</x>
-       <y>100</y>
-       <width>111</width>
+       <x>80</x>
+       <y>10</y>
+       <width>351</width>
        <height>20</height>
       </rect>
      </property>
-     <property name="echoMode" >
-      <enum>QLineEdit::Password</enum>
+    </widget>
+    <widget class="QLineEdit" name="qleSource" >
+     <property name="geometry" >
+      <rect>
+       <x>80</x>
+       <y>40</y>
+       <width>271</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="qpbBrowseSource" >
+     <property name="geometry" >
+      <rect>
+       <x>357</x>
+       <y>38</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Browse</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="qleDestination" >
@@ -165,7 +175,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QCheckBox" name="checkBox_3" >
+    <widget class="QCheckBox" name="qcbDisplayPassword" >
      <property name="geometry" >
       <rect>
        <x>330</x>
@@ -178,14 +188,17 @@
       <string>Display password</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="qleName" >
+    <widget class="QLineEdit" name="qleDestinationPassword" >
      <property name="geometry" >
       <rect>
-       <x>80</x>
-       <y>10</y>
-       <width>351</width>
+       <x>320</x>
+       <y>100</y>
+       <width>111</width>
        <height>20</height>
       </rect>
+     </property>
+     <property name="echoMode" >
+      <enum>QLineEdit::Password</enum>
      </property>
     </widget>
    </widget>

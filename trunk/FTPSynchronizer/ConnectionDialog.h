@@ -9,6 +9,10 @@ class cConnectionDialog : public QDialog, public Ui::qdConnectionDialog
 
 	public:
 		cConnectionDialog();
+
+	private slots:
+		void on_qcbDisplayPassword_stateChanged(int state);
+		void on_qpbBrowseSource_clicked(bool checked = false);
 }; // cConnectionDialog
 
 #endif
