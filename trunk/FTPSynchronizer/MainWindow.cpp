@@ -18,12 +18,13 @@ cMainWindow::cMainWindow()
 	// create qtwFTP context menu
 	qmConnection = new QMenu(qtwConnections);
 	qmConnectionAdd = new QMenu(tr("&Add"), qmConnection);
-	qmConnectionAdd->addAction(tr("&Connection"), this, SLOT(on_qaAddConnection_triggered()));
-	qmConnectionAdd->addAction(tr("F&older"), this, SLOT(on_qaAddFolder_triggered()));
+	qmConnectionAdd->setIcon(QIcon(":/menubar/Images/MainWindow/menubar/Add.png"));
+	qmConnectionAdd->addAction(QIcon(":/menubar/Images/MainWindow/menubar/Add Connection.png"), tr("&Connection"), this, SLOT(on_qaAddConnection_triggered()));
+	qmConnectionAdd->addAction(QIcon(":/menubar/Images/MainWindow/menubar/Add Folder.png"), tr("F&older"), this, SLOT(on_qaAddFolder_triggered()));
 	qmConnection->addMenu(qmConnectionAdd);
-	qaContextEdit = qmConnection->addAction(tr("&Edit"), this, SLOT(on_qaEdit_triggered()));
+	qaContextEdit = qmConnection->addAction(QIcon(":/menubar/Images/MainWindow/menubar/Edit.png"), tr("&Edit"), this, SLOT(on_qaEdit_triggered()));
 	qaContextEdit->setEnabled(false);
-	qaContextRemove = qmConnection->addAction(tr("&Remove"), this, SLOT(on_qaRemove_triggered()));
+	qaContextRemove = qmConnection->addAction(QIcon(":/menubar/Images/MainWindow/menubar/Remove.png"), tr("&Remove"), this, SLOT(on_qaRemove_triggered()));
 	qaContextRemove->setEnabled(false);
 
 	// show connection tree
@@ -101,12 +102,14 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 		} else {
 			if (ccConnections.GetProperty(qdnSelected, cConnections::Type) == qsFOLDER) {
 				qtwiNewItem = new QTreeWidgetItem(qtwiSelected);
+				qtwiNewItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Folder.png"));
 			} else {
 				if (qtwiSelected->parent()) {
 					qtwiNewItem = new QTreeWidgetItem(qtwiSelected->parent(), qtwiSelected);
 				} else {
 					qtwiNewItem = new QTreeWidgetItem(qtwConnections, qtwiSelected);
 				} // if else
+				qtwiNewItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Connection.png"));
 			} // if else
 		} // if else
 		if (ccdNewConnection) {
@@ -399,9 +402,15 @@ void cMainWindow::ShowConnectionTree()
 			// non-empty folder
 			qsXMLLevel.push(qdnConnection);
 			qsTreeLevel.push(qtwiItem);
-			qdnConnection = qdnConnection.firstChild();
+			qtwiItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Folder.png"));
+			qdnConnection = qdnConnection.namedItem(qsCONNECTION);
 		} else {
 			// empty folder or connection
+			if (ccConnections.GetProperty(qdnConnection, cConnections::Type) == qsCONNECTION) {
+				qtwiItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Connection.png"));
+			} else {
+				qtwiItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Folder.png"));
+			} // if else
 			qdnConnection = qdnConnection.nextSibling();
 			while (qdnConnection.isNull() && !qsXMLLevel.isEmpty()) {
 				qdnConnection = qsXMLLevel.pop();
@@ -426,22 +435,22 @@ void cMainWindow::ShowInfo(QTreeWidgetItem *qtwiSelected)
 			qsDestination = "<b>" + tr("Destination") + ":</b> " + ccConnections.GetProperty(qdnSelected, cConnections::DestinationPath);
 			qsIncludeSubdirectories = "<b>" + tr("Include subdirectories") + ":</b> ";
 			if (ccConnections.GetProperty(qdnSelected, cConnections::IncludeSubdirectories) == qsTRUE) {
-				qsIncludeSubdirectories += tr("Yes");
+				qsIncludeSubdirectories += "<img src=\":/ConnectionInfo/Images/MainWindow/ConnectionInfo/Yes.png\">";
 			} else {
-				qsIncludeSubdirectories += tr("No");
+				qsIncludeSubdirectories += "<img src=\":/ConnectionInfo/Images/MainWindow/ConnectionInfo/No.png\">";
 			} // if else
 			qsType = "<b>" + tr("Type") + ":</b> " + ccConnections.GetProperty(qdnSelected, cConnections::SynchronizationType);
 			qsBuffered = "<b>" + tr("Buffered") + ":</b> ";
 			if (ccConnections.GetProperty(qdnSelected, cConnections::Buffered) == qsTRUE) {
-				qsBuffered += tr("Yes");
+				qsBuffered += "<img src=\":/ConnectionInfo/Images/MainWindow/ConnectionInfo/Yes.png\">";
 			} else {
-				qsBuffered += tr("No");
+				qsBuffered += "<img src=\":/ConnectionInfo/Images/MainWindow/ConnectionInfo/No.png\">";
 			} // if else
 			qsDeleteObsoleteFiles = "<b>" + tr("Delete obsolete files") + ":</b> ";
 			if (ccConnections.GetProperty(qdnSelected, cConnections::DeleteObsoleteFiles) == qsTRUE) {
-				qsDeleteObsoleteFiles += tr("Yes");
+				qsDeleteObsoleteFiles += "<img src=\":/ConnectionInfo/Images/MainWindow/ConnectionInfo/Yes.png\">";
 			} else {
-				qsDeleteObsoleteFiles += tr("No");
+				qsDeleteObsoleteFiles += "<img src=\":/ConnectionInfo/Images/MainWindow/ConnectionInfo/No.png\">";
 			} // if else
 
 			qteConnectionInfo->setHtml(qsSource + "<br />" + qsDestination + "<br /><br />" +

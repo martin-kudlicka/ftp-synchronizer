@@ -1,7 +1,7 @@
 CONFIG += qt warn_on
 QT += xml network
-//RC_FILE = Sequence.rc
-//RESOURCES = MainWindow.qrc
+RC_FILE = FTPSynchronizer.rc
+RESOURCES = MainWindow.qrc
 FORMS = MainWindow.ui \
 		ConnectionDialog.ui \
 		FolderDialog.ui

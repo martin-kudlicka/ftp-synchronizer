@@ -15,6 +15,9 @@
   <property name="windowTitle" >
    <string>FTP Synchronizer</string>
   </property>
+  <property name="windowIcon" >
+   <iconset resource="MainWindow.qrc" >:/MainWindow/Images/MainWindow/MainWindow/FTPSynchronizer.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget" >
    <widget class="QSplitter" name="splitter_2" >
     <property name="geometry" >
@@ -93,11 +96,11 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuHelp" >
+   <widget class="QMenu" name="menuFile" >
     <property name="title" >
-     <string>&amp;Help</string>
+     <string>&amp;File</string>
     </property>
-    <addaction name="actionAbout" />
+    <addaction name="qaExit" />
    </widget>
    <widget class="QMenu" name="menuEdit" >
     <property name="title" >
@@ -107,6 +110,9 @@
      <property name="title" >
       <string>&amp;Add</string>
      </property>
+     <property name="icon" >
+      <iconset resource="MainWindow.qrc" >:/menubar/Images/MainWindow/menubar/Add.png</iconset>
+     </property>
      <addaction name="qaAddConnection" />
      <addaction name="qaAddFolder" />
     </widget>
@@ -114,11 +120,11 @@
     <addaction name="qaEdit" />
     <addaction name="qaRemove" />
    </widget>
-   <widget class="QMenu" name="menuFile" >
+   <widget class="QMenu" name="menuHelp" >
     <property name="title" >
-     <string>&amp;File</string>
+     <string>&amp;Help</string>
     </property>
-    <addaction name="qaExit" />
+    <addaction name="actionAbout" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuEdit" />
@@ -139,6 +145,9 @@
    <property name="enabled" >
     <bool>false</bool>
    </property>
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/toolBar/Images/MainWindow/toolBar/Start.png</iconset>
+   </property>
    <property name="text" >
     <string>Start</string>
    </property>
@@ -147,16 +156,25 @@
    <property name="enabled" >
     <bool>false</bool>
    </property>
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/toolBar/Images/MainWindow/toolBar/Stop.png</iconset>
+   </property>
    <property name="text" >
     <string>Stop</string>
    </property>
   </action>
   <action name="qaAddConnection" >
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/menubar/Images/MainWindow/menubar/Add Connection.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Connection</string>
    </property>
   </action>
   <action name="qaAddFolder" >
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/menubar/Images/MainWindow/menubar/Add Folder.png</iconset>
+   </property>
    <property name="text" >
     <string>F&amp;older</string>
    </property>
@@ -170,6 +188,9 @@
    <property name="enabled" >
     <bool>false</bool>
    </property>
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/menubar/Images/MainWindow/menubar/Remove.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Remove</string>
    </property>
@@ -178,18 +199,26 @@
    <property name="enabled" >
     <bool>false</bool>
    </property>
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/menubar/Images/MainWindow/menubar/Edit.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Edit</string>
    </property>
   </action>
   <action name="qaExit" >
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/menubar/Images/MainWindow/menubar/Exit.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Exit</string>
    </property>
   </action>
  </widget>
  <pixmapfunction></pixmapfunction>
- <resources/>
+ <resources>
+  <include location="MainWindow.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>qaExit</sender>

@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/ConnectionInfo" >
+        <file>Images/MainWindow/ConnectionInfo/No.png</file>
+        <file>Images/MainWindow/ConnectionInfo/Yes.png</file>
+    </qresource>
+    <qresource prefix="/Connections" >
+        <file>Images/MainWindow/Connections/Connection.png</file>
+        <file>Images/MainWindow/Connections/Folder.png</file>
+    </qresource>
+    <qresource prefix="/MainWindow" >
+        <file>Images/MainWindow/MainWindow/FTPSynchronizer.png</file>
+    </qresource>
+    <qresource prefix="/menubar" >
+        <file>Images/MainWindow/menubar/Add Connection.png</file>
+        <file>Images/MainWindow/menubar/Add Folder.png</file>
+        <file>Images/MainWindow/menubar/Add.png</file>
+        <file>Images/MainWindow/menubar/Edit.png</file>
+        <file>Images/MainWindow/menubar/Exit.png</file>
+        <file>Images/MainWindow/menubar/Remove.png</file>
+    </qresource>
+    <qresource prefix="/toolBar" >
+        <file>Images/MainWindow/toolBar/Start.png</file>
+        <file>Images/MainWindow/toolBar/Stop.png</file>
+    </qresource>
+</RCC>
