@@ -7,6 +7,28 @@ const QString qsFILES = "Files";
 const QString qsITEM = "Item";
 const QString qsLAST_MODIFIED = "LastModified";
 
+// check for directory in buffer
+bool cSynchronize::BufferContainsDirectory(const eDirection edDirection, const QString qsName)
+{
+	QDomNode qdnDirectories, qdnName;
+
+	if (edDirection == Source) {
+		qdnDirectories = qdnSourceBuffer.namedItem(qsDIRECTORIES);
+	} else {
+		qdnDirectories = qdnDestinationBuffer.namedItem(qsDIRECTORIES);
+	} // if else
+
+	qdnName = qdnDirectories.firstChild();
+	while (!qdnName.isNull()) {
+		if (qdnName.toElement().text() == qsName) {
+			return true;
+		} // if
+		qdnName = qdnName.nextSibling();
+	} // while
+
+	return false;
+} // BufferContainsDirectory
+
 // connect to FTP
 void cSynchronize::ConnectDestination()
 {
@@ -58,31 +80,78 @@ void cSynchronize::CopyFiles(const eDirection edDirection)
 // create destination directories
 void cSynchronize::CreateDirectories(const eDirection edDirection)
 {
-	// TODO watch buffer
 	if (edDirection == Source) {
 		// create on source
-		int iI;
+		if (bBufferedDownload) {
+			// buffered
+			int iI;
 
-		for (iI = 0; iI < qqDestinationDirectories.count() && !bStop; iI++) {
-			if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
-				QDir qdDir;
+			for (iI = 0; iI < qqDestinationDirectories.count() && !bStop; iI++) {
+				if (!BufferContainsDirectory(Destination, qqDestinationDirectories.at(iI))) {
+					QDir qdDir;
 
-				emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
-				qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
-			} // if
-		} // for
+					emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
+					qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
+					CreateDirectoryInBuffer(Destination, qqDestinationDirectories.at(iI));
+				} // if
+			} // for
+		} else {
+			// not buffered
+			int iI;
+
+			for (iI = 0; iI < qqDestinationDirectories.count() && !bStop; iI++) {
+				if (qqSourceDirectories.indexOf(qqDestinationDirectories.at(iI)) == -1) {
+					QDir qdDir;
+
+					emit SendMessage(tr("Creating: %1").arg(qqDestinationDirectories.at(iI)));
+					qdDir.mkdir(quSource.path() + "/" + qqDestinationDirectories.at(iI));
+				} // if
+			} // for
+		} // if else
 	} else {
 		// create on destination
-		int iI;
+		if (bBufferedUpload) {
+			// buffered
+			int iI;
 
-		for (iI = 0; iI < qqSourceDirectories.count() && !bStop; iI++) {
-			if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
-				emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
-				qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI));
-			} // if
-		} // for
+			for (iI = 0; iI < qqSourceDirectories.count() && !bStop; iI++) {
+				if (!BufferContainsDirectory(Source, qqSourceDirectories.at(iI))) {
+					sCommand scCommand;
+
+					emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
+					scCommand.qsMessage = qqSourceDirectories.at(iI);
+					qhCommands.insert(qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI)), scCommand);
+				} // if
+			} // for
+		} else {
+			// not buffered
+			int iI;
+
+			for (iI = 0; iI < qqSourceDirectories.count() && !bStop; iI++) {
+				if (qqDestinationDirectories.indexOf(qqSourceDirectories.at(iI)) == -1) {
+					emit SendMessage(tr("Creating: %1").arg(qqSourceDirectories.at(iI)));
+					qfDestination.mkdir(quDestination.path() + "/" + qqSourceDirectories.at(iI));
+				} // if
+			} // for
+		} // if else
 	} // if else
 } // CreateDirectories
+
+// create new directory entry in buffer
+void cSynchronize::CreateDirectoryInBuffer(const eDirection edDirection, const QString qsName)
+{
+	QDomNode qdnDirectories, qdnName;
+
+	if (edDirection == Source) {
+		qdnDirectories = qdnSourceBuffer.namedItem(qsDIRECTORIES);
+	} else {
+		qdnDirectories = qdnDestinationBuffer.namedItem(qsDIRECTORIES);
+	} // if else
+
+	qdnName = ccConnections->qddXML.createElement(qsNAME);
+	qdnDirectories.appendChild(qdnName);
+	cXMLTools::SetText(ccConnections->qddXML, &qdnName.toElement(), qsName);
+} // CreateDirectoryInBuffer
 
 // create new buffer on edTarget from opposite
 void cSynchronize::CreateNewBuffer(const eDirection edTarget)
@@ -403,6 +472,10 @@ void cSynchronize::GetFileList(const eDirection edDirection)
 			qfDestination.list();
 			// rest as in source in on_qfDestination_commandFinished
 		} // if
+		if (bBufferedUpload && !bCreateSourceBuffer) {
+			// continue in synchronization
+			Synchronize2();
+		} // if
 		if (bBufferedDownload) {
 			// get destination buffer
 			qdnDestinationBuffer = ccConnections->GetBuffer(qdnConnection, edDirection);
@@ -533,8 +606,17 @@ void cSynchronize::on_qfDestination_commandFinished(int id, bool error)
 		return;
 	} // if
 
+	// Mkdir
+	if (qfDestination.currentCommand() == QFtp::Mkdir && !error) {
+		sCommand scCommand;
+
+		scCommand = qhCommands.value(id);
+		CreateDirectoryInBuffer(Source, scCommand.qsMessage);
+		return;
+	} // if
+
 	// Remove, Rmdir
-	if (qfDestination.currentCommand() == QFtp::Remove || qfDestination.currentCommand() == QFtp::Rmdir) {
+	if ((qfDestination.currentCommand() == QFtp::Remove || qfDestination.currentCommand() == QFtp::Rmdir) && !error) {
 		sCommand scCommand;
 
 		scCommand = qhCommands.value(id);
