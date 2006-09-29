@@ -67,6 +67,11 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 		} else {
 			qsSynchronization = qsDOWNLOAD;
 		} // if else
+		// correction
+		if (!ccdNewConnection->qleDestination->text().startsWith("ftp://", Qt::CaseInsensitive)) {
+			// add ftp:// prefix
+			ccdNewConnection->qleDestination->setText("ftp://" + ccdNewConnection->qleDestination->text());
+		} // if
 		qdnNewItem = ccConnections.ModifyConnection(emModify,
 																  qdnSelected,
 																  // Connection
@@ -415,8 +420,33 @@ void cMainWindow::ShowInfo(QTreeWidgetItem *qtwiSelected)
 
 		qdnSelected = qhTable.value(qtwiSelected);
 		if (ccConnections.GetProperty(qdnSelected, cConnections::Type) == qsCONNECTION) {
-			qteConnectionInfo->setPlainText(tr("Source: ") + ccConnections.GetProperty(qdnSelected, cConnections::SourcePath) + "\n" +
-													  tr("Destination: ") + ccConnections.GetProperty(qdnSelected, cConnections::DestinationPath));
+			QString qsBuffered, qsDeleteObsoleteFiles, qsDestination, qsIncludeSubdirectories, qsSource, qsType;
+
+			qsSource = "<b>" + tr("Source") + ":</b> " + ccConnections.GetProperty(qdnSelected, cConnections::SourcePath);
+			qsDestination = "<b>" + tr("Destination") + ":</b> " + ccConnections.GetProperty(qdnSelected, cConnections::DestinationPath);
+			qsIncludeSubdirectories = "<b>" + tr("Include subdirectories") + ":</b> ";
+			if (ccConnections.GetProperty(qdnSelected, cConnections::IncludeSubdirectories) == qsTRUE) {
+				qsIncludeSubdirectories += tr("Yes");
+			} else {
+				qsIncludeSubdirectories += tr("No");
+			} // if else
+			qsType = "<b>" + tr("Type") + ":</b> " + ccConnections.GetProperty(qdnSelected, cConnections::SynchronizationType);
+			qsBuffered = "<b>" + tr("Buffered") + ":</b> ";
+			if (ccConnections.GetProperty(qdnSelected, cConnections::Buffered) == qsTRUE) {
+				qsBuffered += tr("Yes");
+			} else {
+				qsBuffered += tr("No");
+			} // if else
+			qsDeleteObsoleteFiles = "<b>" + tr("Delete obsolete files") + ":</b> ";
+			if (ccConnections.GetProperty(qdnSelected, cConnections::DeleteObsoleteFiles) == qsTRUE) {
+				qsDeleteObsoleteFiles += tr("Yes");
+			} else {
+				qsDeleteObsoleteFiles += tr("No");
+			} // if else
+
+			qteConnectionInfo->setHtml(qsSource + "<br />" + qsDestination + "<br /><br />" +
+												qsIncludeSubdirectories + "<br /><br />" +
+												qsType + "<br />" + qsBuffered + "<br />" + qsDeleteObsoleteFiles);
 		} else {
 			qteConnectionInfo->clear();
 		} // if else

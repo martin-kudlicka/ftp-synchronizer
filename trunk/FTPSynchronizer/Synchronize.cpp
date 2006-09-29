@@ -34,6 +34,11 @@ bool cSynchronize::CanCopy(const eDirection edDirection, const QHashIterator<QSt
 {
 	QDomNode qdnFiles, qdnItem;
 
+	if (qhiI.value().toString() == "") {
+		// no date/time stamp
+		return true;
+	} // if
+
 	if (edDirection == Source) {
 		qdnFiles = qdnDestinationBuffer.namedItem(qsFILES);
 	} else {
