@@ -1,0 +1,122 @@
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>qwAbout</class>
+ <widget class="QWidget" name="qwAbout" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>313</width>
+    <height>172</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>About</string>
+  </property>
+  <widget class="QPushButton" name="qpbOK" >
+   <property name="geometry" >
+    <rect>
+     <x>220</x>
+     <y>140</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+   <property name="autoDefault" >
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>291</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <widget class="QLabel" name="label" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>100</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string/>
+    </property>
+    <property name="pixmap" >
+     <pixmap resource="About.qrc" >:/About/About/Isshou.jpg</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="qlVersion" >
+    <property name="geometry" >
+     <rect>
+      <x>120</x>
+      <y>30</y>
+      <width>46</width>
+      <height>14</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="qlApplication" >
+    <property name="geometry" >
+     <rect>
+      <x>120</x>
+      <y>10</y>
+      <width>91</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2" >
+    <property name="geometry" >
+     <rect>
+      <x>120</x>
+      <y>50</y>
+      <width>46</width>
+      <height>14</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Isshou</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <resources>
+  <include location="About.qrc" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>qpbOK</sender>
+   <signal>clicked()</signal>
+   <receiver>qwAbout</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>261</x>
+     <y>181</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>160</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

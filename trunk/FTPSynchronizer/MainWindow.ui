@@ -124,7 +124,7 @@
     <property name="title" >
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionAbout" />
+    <addaction name="qaAbout" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuEdit" />
@@ -179,7 +179,10 @@
     <string>F&amp;older</string>
    </property>
   </action>
-  <action name="actionAbout" >
+  <action name="qaAbout" >
+   <property name="icon" >
+    <iconset resource="MainWindow.qrc" >:/menubar/Images/MainWindow/menubar/About.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;About</string>
    </property>

@@ -302,4 +302,23 @@
         <translation>&amp;Konec</translation>
     </message>
 </context>
+<context>
+    <name>qwAbout</name>
+    <message>
+        <source>About</source>
+        <translation>O programu</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation>OK</translation>
+    </message>
+    <message>
+        <source>TextLabel</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Isshou</source>
+        <translation></translation>
+    </message>
+</context>
 </TS>

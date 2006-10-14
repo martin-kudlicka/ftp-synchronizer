@@ -11,6 +11,7 @@
         <file>Images/MainWindow/MainWindow/FTPSynchronizer.png</file>
     </qresource>
     <qresource prefix="/menubar" >
+        <file>Images/MainWindow/menubar/About.png</file>
         <file>Images/MainWindow/menubar/Add Connection.png</file>
         <file>Images/MainWindow/menubar/Add Folder.png</file>
         <file>Images/MainWindow/menubar/Add.png</file>

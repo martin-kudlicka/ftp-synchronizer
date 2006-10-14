@@ -9,6 +9,9 @@
 #include "FolderDialog.h"
 #include "Synchronize.h"
 
+const QString qsAPPLICATION = "FTP Synchronizer";
+const QString qsVERSION = "0.3.0.0";
+
 class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 {
 	Q_OBJECT
@@ -46,6 +49,7 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 		void on_cSynchronize_FTPStateChanged(const int iState);
 		void on_cSynchronize_Message(const QString qsMessage, const eMessageType emtMessageType);
 		void on_cSynchronize_Progress(const qint64 qi64Done, const qint64 qi64Total);
+		void on_qaAbout_triggered();
 		void on_qaAddConnection_triggered();
 		void on_qaAddFolder_triggered();
 		void on_qaEdit_triggered();

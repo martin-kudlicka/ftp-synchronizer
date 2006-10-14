@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QResizeEvent>
 #include "Common/CommandLine.h"
+#include "Common/About.h"
 
 // create of main window
 cMainWindow::cMainWindow()
@@ -246,6 +247,17 @@ void cMainWindow::on_cSynchronize_Progress(qint64 qi64Done, qint64 qi64Total)
 	qpbProgress->setMaximum(qi64Total);
 	qpbProgress->setValue(qi64Done);
 } // on_cSynchronize_Progress
+
+// show about window
+void cMainWindow::on_qaAbout_triggered()
+{
+	cAbout *caAbout;
+
+	caAbout = new cAbout();
+	caAbout->SetApplication(qsAPPLICATION);
+	caAbout->SetVersion(qsVERSION);
+	caAbout->show();
+} // on_qaAbout_triggered
 
 // add new connection
 void cMainWindow::on_qaAddConnection_triggered()
