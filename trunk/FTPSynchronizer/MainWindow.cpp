@@ -3,6 +3,7 @@
 #include <QStack>
 #include <QScrollBar>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 // create of main window
 cMainWindow::cMainWindow()
@@ -374,6 +375,12 @@ void cMainWindow::on_qtwConnections_customContextMenuRequested(const QPoint &pos
 {
 	qmConnection->exec(qtwConnections->viewport()->mapToGlobal(pos));
 } // on_qtwFTPTree_customContextMenuRequested
+
+// catch main window resizing
+void cMainWindow::resizeEvent(QResizeEvent *event)
+{
+	qsSplitter->setGeometry(iBORDER, iBORDER, width() - 2 * iBORDER, height() - 5 * iBORDER);
+} // resizeEvent
 
 // fill qtwConnection with connections from XML and fill qhTable
 void cMainWindow::ShowConnectionTree()

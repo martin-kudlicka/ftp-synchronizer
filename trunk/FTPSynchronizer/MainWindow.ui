@@ -19,7 +19,7 @@
    <iconset resource="MainWindow.qrc" >:/MainWindow/Images/MainWindow/MainWindow/FTPSynchronizer.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget" >
-   <widget class="QSplitter" name="splitter_2" >
+   <widget class="QSplitter" name="qsSplitter" >
     <property name="geometry" >
      <rect>
       <x>10</x>

@@ -17,6 +17,7 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 		cMainWindow();
 
 	private:
+		const static int iBORDER = 10;
 		const static unsigned int uiTOOL_BAR_POSITION = 1;
 
 		cConnections ccConnections;
@@ -29,6 +30,7 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 														  const cFolderDialog *cfdNewFolder,
 														  const cConnections::eModify emModify);
 		bool IsFolder(QTreeWidgetItem *qtwiItem);
+		void resizeEvent(QResizeEvent *event);
 		void ShowConnectionTree();
 		void ShowInfo(QTreeWidgetItem *qtwiSelected);
 
