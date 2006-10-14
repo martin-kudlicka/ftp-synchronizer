@@ -14,6 +14,9 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 	Q_OBJECT
 
 	public:
+		bool bCommandLine;
+		const static QEvent::Type qetCOMMANDLINE_EVENT = QEvent::User;
+
 		cMainWindow();
 
 	private:
@@ -29,6 +32,7 @@ class cMainWindow : public QMainWindow, private Ui::qmwMainWindow
 		void ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdNewConnection,
 														  const cFolderDialog *cfdNewFolder,
 														  const cConnections::eModify emModify);
+		void customEvent(QEvent *event);
 		bool IsFolder(QTreeWidgetItem *qtwiItem);
 		void resizeEvent(QResizeEvent *event);
 		void ShowConnectionTree();

@@ -24,6 +24,7 @@ class cConnections
 							 DestinationPassword,
 							 DestinationUsername,
 							 IncludeSubdirectories,
+							 LastRun,
 							 Name,
 							 SourcePath,
 							 SynchronizationType,

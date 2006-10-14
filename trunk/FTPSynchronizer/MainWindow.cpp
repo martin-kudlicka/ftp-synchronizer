@@ -4,6 +4,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 #include <QResizeEvent>
+#include "Common/CommandLine.h"
 
 // create of main window
 cMainWindow::cMainWindow()
@@ -44,6 +45,9 @@ cMainWindow::cMainWindow()
 			  this, SLOT(on_cSynchronize_FTPStateChanged(const int)));
 	connect((QObject *)&csSynchronize, SIGNAL(Progress(const qint64, const qint64)),
 			  this, SLOT(on_cSynchronize_Progress(const qint64, const qint64)));
+
+	// initialize variables
+	csSynchronize.ccConnections = &ccConnections;
 } // cMainWindow
 
 // connection dialog accepted - make changes
@@ -103,20 +107,20 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 		} else {
 			if (ccConnections.GetProperty(qdnSelected, cConnections::Type) == qsFOLDER) {
 				qtwiNewItem = new QTreeWidgetItem(qtwiSelected);
-				qtwiNewItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Folder.png"));
 			} else {
 				if (qtwiSelected->parent()) {
 					qtwiNewItem = new QTreeWidgetItem(qtwiSelected->parent(), qtwiSelected);
 				} else {
 					qtwiNewItem = new QTreeWidgetItem(qtwConnections, qtwiSelected);
 				} // if else
-				qtwiNewItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Connection.png"));
 			} // if else
 		} // if else
 		if (ccdNewConnection) {
 			qtwiNewItem->setText(0, ccdNewConnection->qleName->text());
+			qtwiNewItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Connection.png"));
 		} else {
 			qtwiNewItem->setText(0, cfdNewFolder->qleName->text());
+			qtwiNewItem->setIcon(0, QIcon(":/Connections/Images/MainWindow/Connections/Folder.png"));
 		} // if else
 
 		// to hash table
@@ -135,6 +139,35 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 		ShowInfo(qtwiSelected);
 	} // if else
 } // ConnectionOrFolderDialogAccepted
+
+// custom event handler
+void cMainWindow::customEvent(QEvent *event)
+{
+	cCommandLine cclOptions;
+	QList<QTreeWidgetItem *> qltwiItems;
+	QString qsConnection;
+
+	cclOptions.cArguments = qApp->argv();
+	cclOptions.iArguments = qApp->argc();
+
+	cclOptions.AddKeyValue("c", &qsConnection);
+
+	// parse
+	cclOptions.Parse();
+
+	// find connection in tree
+	qltwiItems = qtwConnections->findItems(qsConnection, Qt::MatchRecursive);
+	if (qltwiItems.count() == 0 || qltwiItems.at(0)->childCount() > 0) {
+		// skip if not exists or is folder
+		close();
+		return;
+	} // if
+	qtwConnections->setCurrentItem(qltwiItems.at(0));
+
+	// synchronize
+	csSynchronize.qsName = qsConnection;
+	csSynchronize.Start();
+} // event
 
 // returns true if tree item is folder
 bool cMainWindow::IsFolder(QTreeWidgetItem *qtwiItem)
@@ -158,6 +191,12 @@ void cMainWindow::on_cSynchronize_Done()
 
 	on_cSynchronize_Message(tr("Done\n"), Information);
 	qpbProgress->setValue(0);
+
+	if (bCommandLine) {
+		close();
+	} // if
+
+	ShowInfo(qtwConnections->currentItem());
 } // on_cSynchronize_Done
 
 // destination FTP state change
@@ -328,7 +367,6 @@ void cMainWindow::on_qaStart_triggered()
 	on_cSynchronize_Message(tr("Synchronization started"), Information);
 
 	csSynchronize.qsName = qtwConnections->currentItem()->text(0);
-	csSynchronize.ccConnections = &ccConnections;
 	csSynchronize.Start();
 } // on_qsStart_triggered
 
@@ -436,7 +474,7 @@ void cMainWindow::ShowInfo(QTreeWidgetItem *qtwiSelected)
 
 		qdnSelected = qhTable.value(qtwiSelected);
 		if (ccConnections.GetProperty(qdnSelected, cConnections::Type) == qsCONNECTION) {
-			QString qsBuffered, qsDeleteObsoleteFiles, qsDestination, qsIncludeSubdirectories, qsSource, qsType;
+			QString qsBuffered, qsDeleteObsoleteFiles, qsDestination, qsIncludeSubdirectories, qsLastRun, qsSource, qsType;
 
 			qsSource = "<b>" + tr("Source") + ":</b> " + ccConnections.GetProperty(qdnSelected, cConnections::SourcePath);
 			qsDestination = "<b>" + tr("Destination") + ":</b> " + ccConnections.GetProperty(qdnSelected, cConnections::DestinationPath);
@@ -459,10 +497,13 @@ void cMainWindow::ShowInfo(QTreeWidgetItem *qtwiSelected)
 			} else {
 				qsDeleteObsoleteFiles += "<img src=\":/ConnectionInfo/Images/MainWindow/ConnectionInfo/No.png\">";
 			} // if else
+			qsLastRun = "<b>" + tr("Last run") + ":</b> ";
+			qsLastRun += ccConnections.GetProperty(qdnSelected, cConnections::LastRun);
 
 			qteConnectionInfo->setHtml(qsSource + "<br />" + qsDestination + "<br /><br />" +
 												qsIncludeSubdirectories + "<br /><br />" +
-												qsType + "<br />" + qsBuffered + "<br />" + qsDeleteObsoleteFiles);
+												qsType + "<br />" + qsBuffered + "<br />" + qsDeleteObsoleteFiles + "<br /><br />" +
+												qsLastRun);
 		} else {
 			qteConnectionInfo->clear();
 		} // if else

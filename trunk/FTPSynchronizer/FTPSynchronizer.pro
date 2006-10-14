@@ -10,12 +10,14 @@ HEADERS = MainWindow.h \
 		  Connections.h \
 		  Common/XMLTools.h \
 		  FolderDialog.h \
-		  Synchronize.h
+		  Synchronize.h \
+		  Common/CommandLine.h
 SOURCES = FTPSynchronizer.cpp \
 		  MainWindow.cpp \
 		  ConnectionDialog.cpp \
 		  Connections.cpp \
 		  Common/XMLTools.cpp \
 		  FolderDialog.cpp \
-		  Synchronize.cpp
+		  Synchronize.cpp \
+		  Common/CommandLine.cpp
 //TRANSLATIONS = Sequence_cs_CZ.ts

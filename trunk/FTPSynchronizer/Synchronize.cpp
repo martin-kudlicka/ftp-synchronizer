@@ -65,6 +65,9 @@ bool cSynchronize::CanCopy(const eDirection edDirection, const QHashIterator<QSt
 // connect to FTP
 void cSynchronize::ConnectDestination()
 {
+#ifdef _DEBUG
+	qDebug("FTP host: %s", quDestination.host().toLatin1().constData());
+#endif
 	qfDestination.connectToHost(quDestination.host());
 	qfDestination.login(ccConnections->GetProperty(qdnConnection, cConnections::DestinationUsername),
 							  ccConnections->GetProperty(qdnConnection, cConnections::DestinationPassword));
@@ -825,6 +828,9 @@ void cSynchronize::on_qfDestination_listInfo(const QUrlInfo &i)
 // FTP state change
 void cSynchronize::on_qfDestination_stateChanged(int state)
 {
+#ifdef _DEBUG
+	qDebug("FTP state: %d", state);
+#endif
 	emit FTPStateChanged(state);
 } // on_qfDestination_stateChanged
 

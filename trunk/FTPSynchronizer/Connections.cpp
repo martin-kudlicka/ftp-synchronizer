@@ -157,6 +157,14 @@ QString cConnections::GetProperty(const QDomNode qdnConnection,
 		case DestinationPassword:		return qdnConnection.namedItem(qsDESTINATION).namedItem(qsPASSWORD).toElement().text();
 		case DestinationUsername:		return qdnConnection.namedItem(qsDESTINATION).namedItem(qsUSERNAME).toElement().text();
 		case IncludeSubdirectories:	return qdnConnection.namedItem(qsSETTINGS).namedItem(qsINCLUDE_SUBDIRECTORIES).toElement().text();
+		case LastRun:						if (qdnConnection.namedItem(qsLAST_RUN).isNull()) {
+													return "";
+												} else {
+													return qdnConnection.namedItem(qsLAST_RUN).namedItem(qsDATE_TIME).toElement().text()
+													+ " (" +
+													qdnConnection.namedItem(qsLAST_RUN).namedItem(qsMESSAGE).toElement().text()
+													+ ")";
+												} // if else
 		case Name:							return qdnConnection.namedItem(qsNAME).toElement().text();
 		case SourcePath:					return qdnConnection.namedItem(qsSOURCE).namedItem(qsPATH).toElement().text();
 		case SynchronizationType:		return qdnConnection.namedItem(qsSYNCHRONIZATION).namedItem(qsTYPE).toElement().text();
