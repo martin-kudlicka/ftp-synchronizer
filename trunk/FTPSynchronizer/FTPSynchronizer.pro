@@ -20,4 +20,4 @@ SOURCES = FTPSynchronizer.cpp \
 		  FolderDialog.cpp \
 		  Synchronize.cpp \
 		  Common/CommandLine.cpp
-//TRANSLATIONS = Sequence_cs_CZ.ts
+TRANSLATIONS = FTPSynchronizer_cs_CZ.ts
