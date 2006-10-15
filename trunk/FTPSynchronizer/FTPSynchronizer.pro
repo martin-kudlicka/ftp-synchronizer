@@ -14,7 +14,8 @@ HEADERS = MainWindow.h \
 		  FolderDialog.h \
 		  Synchronize.h \
 		  Common/CommandLine.h \
-		  Common/About.h
+		  Common/About.h \
+		  Common/System.h
 SOURCES = FTPSynchronizer.cpp \
 		  MainWindow.cpp \
 		  ConnectionDialog.cpp \
@@ -23,5 +24,6 @@ SOURCES = FTPSynchronizer.cpp \
 		  FolderDialog.cpp \
 		  Synchronize.cpp \
 		  Common/CommandLine.cpp \
-		  Common/About.cpp
+		  Common/About.cpp \
+		  Common/System.cpp
 TRANSLATIONS = FTPSynchronizer_cs_CZ.ts

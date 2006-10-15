@@ -2,6 +2,7 @@
 #include <QTranslator>
 #include <QLocale>
 #include "MainWindow.h"
+#include "Common/System.h"
 
 int main(int argc, char **argv)
 {
@@ -9,12 +10,13 @@ int main(int argc, char **argv)
 	QTranslator qtTranslator;
 
 	QApplication qaApplication(argc, argv);
+	qaApplication.addLibraryPath(cSystem::GetIsshouQTPath());
 
 	qtTranslator.load(QString("FTPSynchronizer_") + QLocale::system().name());
 	qaApplication.installTranslator(&qtTranslator);
 
-#ifdef Q_OS_LINUX
-		// change style on Linux - Motif is not very nice
+#ifdef Q_WS_X11
+		// change style on X11 - Motif is not very nice
 		qaApplication.setStyle("plastique");
 #endif
 	cmwMainWindow = new cMainWindow();
