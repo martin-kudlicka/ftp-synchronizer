@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 	QTranslator qtTranslator;
 
 	QApplication qaApplication(argc, argv);
-	qaApplication.addLibraryPath(cSystem::GetIsshouQTPath());
+	qaApplication.addLibraryPath(cSystem::GetIsshouCommonPath());
 
 	qtTranslator.load(QString("FTPSynchronizer_") + QLocale::system().name());
 	qaApplication.installTranslator(&qtTranslator);

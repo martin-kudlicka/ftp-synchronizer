@@ -1,46 +1,17 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>qdConnectionDialog</class>
  <widget class="QDialog" name="qdConnectionDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>468</width>
-    <height>285</height>
+    <width>476</width>
+    <height>308</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Connection settings</string>
   </property>
-  <widget class="QPushButton" name="qpbCancel" >
-   <property name="geometry" >
-    <rect>
-     <x>380</x>
-     <y>250</y>
-     <width>77</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Cancel</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="qpbOK" >
-   <property name="geometry" >
-    <rect>
-     <x>300</x>
-     <y>250</y>
-     <width>77</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>OK</string>
-   </property>
-  </widget>
   <widget class="QTabWidget" name="tabWidget" >
    <property name="geometry" >
     <rect>
@@ -306,8 +277,33 @@
     </widget>
    </widget>
   </widget>
+  <widget class="QPushButton" name="qpbOK" >
+   <property name="geometry" >
+    <rect>
+     <x>300</x>
+     <y>250</y>
+     <width>77</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="qpbCancel" >
+   <property name="geometry" >
+    <rect>
+     <x>380</x>
+     <y>250</y>
+     <width>77</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancel</string>
+   </property>
+  </widget>
  </widget>
- <pixmapfunction></pixmapfunction>
  <tabstops>
   <tabstop>qpbOK</tabstop>
   <tabstop>qpbCancel</tabstop>

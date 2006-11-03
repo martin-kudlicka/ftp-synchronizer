@@ -1,36 +1,17 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>qwAbout</class>
  <widget class="QWidget" name="qwAbout" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>313</width>
-    <height>172</height>
+    <width>317</width>
+    <height>194</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>About</string>
   </property>
-  <widget class="QPushButton" name="qpbOK" >
-   <property name="geometry" >
-    <rect>
-     <x>220</x>
-     <y>140</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>OK</string>
-   </property>
-   <property name="autoDefault" >
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="groupBox" >
    <property name="geometry" >
     <rect>
@@ -96,8 +77,23 @@
     </property>
    </widget>
   </widget>
+  <widget class="QPushButton" name="qpbOK" >
+   <property name="geometry" >
+    <rect>
+     <x>220</x>
+     <y>140</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+   <property name="autoDefault" >
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
- <pixmapfunction></pixmapfunction>
  <resources>
   <include location="About.qrc" />
  </resources>

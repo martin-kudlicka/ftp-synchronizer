@@ -6,8 +6,9 @@
 class cSystem
 {
 	public:
-		static QString GetIsshouQTPath();
-		static QString GetProgramFilesDirectory();
+		static QString GetCommonFilesPath();
+		static QString GetIsshouCommonPath();
+		static QString GetProgramFilesPath();
 }; // cSystem
 
 #endif

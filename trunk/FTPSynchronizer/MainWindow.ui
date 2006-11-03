@@ -1,7 +1,4 @@
 <ui version="4.0" >
- <author></author>
- <comment></comment>
- <exportmacro></exportmacro>
  <class>qmwMainWindow</class>
  <widget class="QMainWindow" name="qmwMainWindow" >
   <property name="geometry" >
@@ -96,12 +93,6 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile" >
-    <property name="title" >
-     <string>&amp;File</string>
-    </property>
-    <addaction name="qaExit" />
-   </widget>
    <widget class="QMenu" name="menuEdit" >
     <property name="title" >
      <string>&amp;Edit</string>
@@ -125,6 +116,12 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="qaAbout" />
+   </widget>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="qaExit" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuEdit" />
@@ -218,14 +215,13 @@
    </property>
   </action>
  </widget>
- <pixmapfunction></pixmapfunction>
  <resources>
   <include location="MainWindow.qrc" />
  </resources>
  <connections>
   <connection>
    <sender>qaExit</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>qmwMainWindow</receiver>
    <slot>close()</slot>
    <hints>
