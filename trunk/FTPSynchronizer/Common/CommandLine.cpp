@@ -4,7 +4,7 @@
 void cCommandLine::AddKeyValue(const QString qsOption, QString *qsValue)
 {
 	qhKeyValues.insert("-" + qsOption, qsValue);
-} // AddOption
+} // AddKeyValue
 
 // check if parametr is keyvalue
 bool cCommandLine::IsKeyValue(const QString qsKey)
