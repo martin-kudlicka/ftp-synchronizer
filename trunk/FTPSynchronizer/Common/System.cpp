@@ -1,10 +1,22 @@
 #include "System.h"
 
-#ifdef Q_WS_WIN
 #include <QSettings>
-#endif
+#include <QDir>
 
-// get common program files directory
+const QString qsCOMPANY = "Isshou";
+
+// get settings path for application
+QString cSystem::GetApplicationSettingsPath(const QString qsApplication)
+{
+	QDir qdDir;
+	QString qsPath;
+	
+	qsPath = GetIsshouSettingsPath();
+	qdDir.mkdir(qsPath + "/" + qsApplication);
+	return qsPath + "/" + qsApplication;
+} // GetApplicationSettingsPath
+
+// get common program files path
 QString cSystem::GetCommonFilesPath()
 {
 	// TODO GetCommonFilesPath - Windows only
@@ -19,7 +31,7 @@ QString cSystem::GetCommonFilesPath()
 	return qsResult;
 } // GetCommonFilesPath
 
-// get Isshou/Common/QT directory
+// get Isshou/Common/QT path
 QString cSystem::GetIsshouCommonPath()
 {
 	QString qsResult;
@@ -30,7 +42,20 @@ QString cSystem::GetIsshouCommonPath()
 	return qsResult;
 } // GetIsshouCommonPath
 
-// get program files directory
+// get settings path for applications
+QString cSystem::GetIsshouSettingsPath()
+{
+	QDir qdDir;
+	QFileInfo qfiFile;
+	QSettings qsSettings(QSettings::IniFormat, QSettings::UserScope, qsCOMPANY);
+	
+	qfiFile.setFile(qsSettings.fileName());
+	qdDir.mkdir(qfiFile.absolutePath() + "/" + qsCOMPANY);
+	
+	return qfiFile.absolutePath() + "/" + qsCOMPANY;
+} // GetIsshouSettingsPath
+
+// get program files path
 QString cSystem::GetProgramFilesPath()
 {
 	// TODO GetProgramFilesPath - Windows only

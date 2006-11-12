@@ -2,14 +2,11 @@
 
 #include "Common/XMLTools.h"
 #include <QStack>
-#include <QSettings>
-#include <QFileInfo>
-#include <QDir>
+#include "Common/System.h"
 
 const QString qsAPPLICATION_NAME = "FTPSynchronizer";
 const QString qsBUFFER = "Buffer";
 const QString qsBUFFERED = "Buffered";
-const QString qsCOMPANY = "Isshou";
 const QString qsCONNECTIONS_FILE = "Connections.xml";
 const QString qsDATE_TIME = "DateTime";
 const QString qsDELETE_OBSOLETE_FILES = "DeleteObsoleteFiles";
@@ -74,17 +71,8 @@ bool cConnections::BufferExists(const QDomNode qdnConnection, const eDirection e
 // load XML file with connections
 cConnections::cConnections()
 {
-	QDir qdDir;
-	QFileInfo qfiFile;
-	QSettings qsSettings(QSettings::IniFormat, QSettings::UserScope, qsCOMPANY);
-
-	// get application data file path and create it
-	qfiFile.setFile(qsSettings.fileName());
-	qdDir.mkdir(qfiFile.absolutePath() + "/" + qsCOMPANY);
-	qdDir.mkdir(qfiFile.absolutePath() + "/" + qsCOMPANY + "/" + qsAPPLICATION_NAME);
-
 	// open data file
-	qfFile.setFileName(qfiFile.absolutePath() + "/" + qsCOMPANY + "/" + qsAPPLICATION_NAME + "/" + qsCONNECTIONS_FILE);
+	qfFile.setFileName(cSystem::GetApplicationSettingsPath(qsAPPLICATION_NAME) + "/" + qsCONNECTIONS_FILE);
 	qfFile.open(QIODevice::ReadWrite);
 	if (!qddXML.setContent(&qfFile)) {
 		// create XML structure
