@@ -8,7 +8,7 @@ class cConnectionDialog : public QDialog, public Ui::qdConnectionDialog
 	Q_OBJECT
 
 	public:
-		cConnectionDialog();
+		cConnectionDialog(QWidget *qwParent);
 
 	private slots:
 		void on_qcbDisplayPassword_stateChanged(int state);

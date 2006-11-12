@@ -1,11 +1,10 @@
 #include "About.h"
 
 // create dialog
-cAbout::cAbout()
+cAbout::cAbout(QWidget *qwParent)
 {
+	setParent(qwParent, windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
 	setupUi(this);
-	setWindowFlags(Qt::SubWindow);
-	setWindowModality(Qt::ApplicationModal);
 } // cAbout
 
 // set application name

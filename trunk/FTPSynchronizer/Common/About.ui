@@ -1,12 +1,12 @@
 <ui version="4.0" >
- <class>qwAbout</class>
- <widget class="QWidget" name="qwAbout" >
+ <class>qdAbout</class>
+ <widget class="QDialog" name="qdAbout" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>317</width>
-    <height>194</height>
+    <width>316</width>
+    <height>176</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -21,22 +21,6 @@
      <height>121</height>
     </rect>
    </property>
-   <widget class="QLabel" name="label" >
-    <property name="geometry" >
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>100</width>
-      <height>100</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string/>
-    </property>
-    <property name="pixmap" >
-     <pixmap resource="About.qrc" >:/About/About/Isshou.jpg</pixmap>
-    </property>
-   </widget>
    <widget class="QLabel" name="qlVersion" >
     <property name="geometry" >
      <rect>
@@ -44,19 +28,6 @@
       <y>30</y>
       <width>46</width>
       <height>14</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>TextLabel</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="qlApplication" >
-    <property name="geometry" >
-     <rect>
-      <x>120</x>
-      <y>10</y>
-      <width>91</width>
-      <height>16</height>
      </rect>
     </property>
     <property name="text" >
@@ -76,11 +47,40 @@
      <string>Isshou</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>100</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string/>
+    </property>
+    <property name="pixmap" >
+     <pixmap resource="About.qrc" >:/About/About/Isshou.jpg</pixmap>
+    </property>
+   </widget>
+   <widget class="QLabel" name="qlApplication" >
+    <property name="geometry" >
+     <rect>
+      <x>120</x>
+      <y>10</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>TextLabel</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QPushButton" name="qpbOK" >
    <property name="geometry" >
     <rect>
-     <x>220</x>
+     <x>230</x>
      <y>140</y>
      <width>75</width>
      <height>23</height>
@@ -101,16 +101,16 @@
   <connection>
    <sender>qpbOK</sender>
    <signal>clicked()</signal>
-   <receiver>qwAbout</receiver>
+   <receiver>qdAbout</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>261</x>
+     <x>271</x>
      <y>181</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>160</x>
-     <y>115</y>
+     <x>161</x>
+     <y>117</y>
     </hint>
    </hints>
   </connection>

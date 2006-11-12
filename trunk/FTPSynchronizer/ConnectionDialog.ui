@@ -6,12 +6,38 @@
     <x>0</x>
     <y>0</y>
     <width>476</width>
-    <height>308</height>
+    <height>285</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Connection settings</string>
   </property>
+  <widget class="QPushButton" name="qpbOK" >
+   <property name="geometry" >
+    <rect>
+     <x>300</x>
+     <y>250</y>
+     <width>77</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>OK</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="qpbCancel" >
+   <property name="geometry" >
+    <rect>
+     <x>380</x>
+     <y>250</y>
+     <width>77</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancel</string>
+   </property>
+  </widget>
   <widget class="QTabWidget" name="tabWidget" >
    <property name="geometry" >
     <rect>
@@ -182,7 +208,7 @@
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>131</width>
+       <width>141</width>
        <height>18</height>
       </rect>
      </property>
@@ -248,7 +274,7 @@
       <rect>
        <x>10</x>
        <y>90</y>
-       <width>81</width>
+       <width>91</width>
        <height>18</height>
       </rect>
      </property>
@@ -264,7 +290,7 @@
       <rect>
        <x>10</x>
        <y>110</y>
-       <width>131</width>
+       <width>141</width>
        <height>18</height>
       </rect>
      </property>
@@ -276,32 +302,6 @@
      </property>
     </widget>
    </widget>
-  </widget>
-  <widget class="QPushButton" name="qpbOK" >
-   <property name="geometry" >
-    <rect>
-     <x>300</x>
-     <y>250</y>
-     <width>77</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>OK</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="qpbCancel" >
-   <property name="geometry" >
-    <rect>
-     <x>380</x>
-     <y>250</y>
-     <width>77</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Cancel</string>
-   </property>
   </widget>
  </widget>
  <tabstops>

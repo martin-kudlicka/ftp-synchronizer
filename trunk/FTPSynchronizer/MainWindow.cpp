@@ -79,6 +79,10 @@ void cMainWindow::ConnectionOrFolderDialogAccepted(const cConnectionDialog *ccdN
 			// add ftp:// prefix
 			ccdNewConnection->qleDestination->setText("ftp://" + ccdNewConnection->qleDestination->text());
 		} // if
+		if (!ccdNewConnection->qleDestination->text().endsWith('/')) {
+			// add last slash
+			ccdNewConnection->qleDestination->setText(ccdNewConnection->qleDestination->text() + '/');
+		} // if
 		qdnNewItem = ccConnections.ModifyConnection(emModify,
 																  qdnSelected,
 																  // Connection
@@ -253,7 +257,7 @@ void cMainWindow::on_qaAbout_triggered()
 {
 	cAbout *caAbout;
 
-	caAbout = new cAbout();
+	caAbout = new cAbout(this);
 	caAbout->SetApplication(qsAPPLICATION);
 	caAbout->SetVersion(qsVERSION);
 	caAbout->show();
@@ -264,7 +268,7 @@ void cMainWindow::on_qaAddConnection_triggered()
 {
 	cConnectionDialog *ccdNewConnection;
 
-	ccdNewConnection = new cConnectionDialog();
+	ccdNewConnection = new cConnectionDialog(this);
 	if (ccdNewConnection->exec() == QDialog::Accepted) {
 		ConnectionOrFolderDialogAccepted(ccdNewConnection, NULL, cConnections::Add);
 	} // if
@@ -277,7 +281,7 @@ void cMainWindow::on_qaAddFolder_triggered()
 {
 	cFolderDialog *cfdNewFolder;
 
-	cfdNewFolder = new cFolderDialog();
+	cfdNewFolder = new cFolderDialog(this);
 	if (cfdNewFolder->exec() == QDialog::Accepted) {
 		ConnectionOrFolderDialogAccepted(NULL, cfdNewFolder, cConnections::Add);
 	} // if
@@ -294,7 +298,7 @@ void cMainWindow::on_qaEdit_triggered()
 		QDomNode qdnFolder;
 
 		qdnFolder = qhTable.value(qtwConnections->currentItem());
-		cfdNewFolder = new cFolderDialog();
+		cfdNewFolder = new cFolderDialog(this);
 
 		// fill values
 		cfdNewFolder->qleName->setText(ccConnections.GetProperty(qdnFolder, cConnections::Name));
@@ -311,7 +315,7 @@ void cMainWindow::on_qaEdit_triggered()
 		QString qsProperty;
 
 		qdnConnection = qhTable.value(qtwConnections->currentItem());
-		ccdNewConnection = new cConnectionDialog();
+		ccdNewConnection = new cConnectionDialog(this);
 
 		// fill values
 		// Connection
@@ -429,7 +433,7 @@ void cMainWindow::on_qtwConnections_customContextMenuRequested(const QPoint &pos
 // catch main window resizing
 void cMainWindow::resizeEvent(QResizeEvent *event)
 {
-	qsSplitter->setGeometry(iBORDER, iBORDER, width() - 2 * iBORDER, height() - 5 * iBORDER);
+	qsSplitter->setGeometry(iBORDER, iBORDER, width() - 2 * iBORDER, height() - 6 * iBORDER);
 } // resizeEvent
 
 // fill qtwConnection with connections from XML and fill qhTable

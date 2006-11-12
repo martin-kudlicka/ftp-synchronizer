@@ -8,7 +8,7 @@ class cFolderDialog : public QDialog, public Ui::qdFolderDialog
 	Q_OBJECT
 
 	public:
-		cFolderDialog();
+		cFolderDialog(QWidget *qwParent);
 }; // cFolderDialog
 
 #endif

@@ -1,8 +1,8 @@
 #include "FolderDialog.h"
 
 // create dialog
-cFolderDialog::cFolderDialog()
+cFolderDialog::cFolderDialog(QWidget *qwParent)
 {
+	setParent(qwParent, windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
 	setupUi(this);
-	setWindowFlags(Qt::SubWindow);
 } // cFolderDialog

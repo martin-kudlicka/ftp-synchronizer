@@ -3,10 +3,10 @@
 #include <QFileDialog>
 
 // create dialog
-cConnectionDialog::cConnectionDialog()
+cConnectionDialog::cConnectionDialog(QWidget *qwParent)
 {
+	setParent(qwParent, windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
 	setupUi(this);
-	setWindowFlags(Qt::SubWindow);
 } // cConnectionDialog
 
 // display destination password

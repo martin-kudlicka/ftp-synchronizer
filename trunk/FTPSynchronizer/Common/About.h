@@ -3,12 +3,12 @@
 
 #include "ui_About.h"
 
-class cAbout : public QWidget, public Ui::qwAbout
+class cAbout : public QDialog, public Ui::qdAbout
 {
 	Q_OBJECT
 
 	public:
-		cAbout();
+		cAbout(QWidget *qwParent);
 
 		void SetApplication(QString qsName);
 		void SetVersion(QString qsVersion);
