@@ -1,4 +1,4 @@
-#include <QDomElement>
+#include <QtXml/QDomElement>
 
 class cXMLTools
 {

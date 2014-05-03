@@ -22,10 +22,10 @@ void cCommandLine::Parse() {
 
 	iArgument = 1;
 
-	while (iArgument < iArguments) {
-		if (IsKeyValue(cArguments[iArgument])) {
+	while (iArgument < qslArguments.count()) {
+		if (IsKeyValue(qslArguments.at(iArgument))) {
 			iArgument++;
-			SetKeyValue(cArguments[iArgument - 1], cArguments[iArgument]);
+			SetKeyValue(qslArguments.at(iArgument - 1), qslArguments.at(iArgument));
 		} // if
 
 		iArgument++;

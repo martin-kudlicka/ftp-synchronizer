@@ -1,13 +1,12 @@
 #ifndef COMMAND_LINE_H
 #define COMMAND_LINE_H
 
-#include <QString>
+#include <QStringList>
 #include <QHash>
 
 class cCommandLine {
 	public:
-		char **cArguments;
-		int iArguments;
+		QStringList qslArguments;
 
 		void AddKeyValue(const QString qsOption, QString *qsValue);
 		void Parse();

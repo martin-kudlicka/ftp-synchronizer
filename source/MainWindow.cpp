@@ -152,8 +152,7 @@ void cMainWindow::customEvent(QEvent *event)
 	QList<QTreeWidgetItem *> qltwiItems;
 	QString qsConnection;
 
-	cclOptions.cArguments = qApp->argv();
-	cclOptions.iArguments = qApp->argc();
+	cclOptions.qslArguments = QCoreApplication::arguments();
 
 	cclOptions.AddKeyValue("c", &qsConnection);
 

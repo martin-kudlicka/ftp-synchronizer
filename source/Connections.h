@@ -1,7 +1,7 @@
 #ifndef CONNECTIONS_H
 #define CONNECTIONS_H
 
-#include <QDomDocument>
+#include <QtXml/QDomDocument>
 #include <QFile>
 #include <QDateTime>
 

@@ -3,7 +3,7 @@
 
 #include <QString>
 #include "Connections.h"
-#include <QFtp>
+#include "../3rdparty/qtftp/source/src/qftp/qftp.h"
 #include <QUrl>
 #include <QDir>
 #include <QQueue>
