@@ -42,7 +42,6 @@
 #ifndef QFTP_H
 #define QFTP_H
 
-#include "../../../qtftp_global.h"
 #include <QtCore/qstring.h>
 #include "qurlinfo.h"
 #include <QtCore/qobject.h>

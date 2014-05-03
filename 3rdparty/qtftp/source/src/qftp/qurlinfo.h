@@ -42,6 +42,7 @@
 #ifndef QURLINFO_H
 #define QURLINFO_H
 
+#include "../../../qtftp_global.h"
 #include <QtCore/qdatetime.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qiodevice.h>
@@ -54,7 +55,7 @@ QT_BEGIN_NAMESPACE
 class QUrl;
 class QUrlInfoPrivate;
 
-class QUrlInfo
+class QTFTP_EXPORT QUrlInfo
 {
 public:
     enum PermissionSpec {
